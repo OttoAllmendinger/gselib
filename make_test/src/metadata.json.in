@@ -6,5 +6,5 @@
     "description": "Brings you the disco king",
     "settings-schema":  "org.gnome.shell.extensions.discoking",
     "gettext-domain": "gnome-shell-foobar",
-    "git-version": "b492d29-dirty"
+    "git-version": "_gitversion_"
 }
