@@ -24,19 +24,11 @@ all: archive
 
 archive: $(ZIPFILE)
 
-$(ZIPFILE): $(SOURCE) schemas translations gselib
+$(ZIPFILE): $(SOURCE) schemas translations
 	-rm $(ZIPFILE)
 	cd src && zip -r ../$(ZIPFILE) \
 	   $(patsubst src/%,%,$(SOURCE)) \
 	   $(patsubst src/%,%,$(MO_FILES))
-
-gselib: FORCE
-ifeq ($(SKIP_GSELIB),1)
-	echo "skipping gselib update"
-else
-	git submodule update --init gselib
-endif
-
 
 src/metadata.json: FORCE
 	sed 's/_gitversion_/$(GIT_VERSION)/' src/metadata.json.in > src/metadata.json
