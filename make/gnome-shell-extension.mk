@@ -20,6 +20,8 @@ PO_FILES_UNFMT := $(foreach lang,$(LANGUAGES),src/locale/$(lang)/LC_MESSAGES/unf
 EXTENSION_PATH_RELATIVE=.local/share/gnome-shell/extensions/$(UUID)
 EXTENSION_PATH = $(HOME)/$(EXTENSION_PATH_RELATIVE)
 
+VAGRANT_DIR ?= gselib/vagrant
+
 all: archive
 
 archive: $(ZIPFILE)
@@ -98,7 +100,7 @@ $(VM_SSHCONFIG_PATH):
 ifeq ($(GSELIB_VM),)
 	$(error please specify VM name in GSELIB_VM)
 endif
-	cd gselib/vagrant/$(GSELIB_VM) && vagrant ssh-config >> $@
+	cd $(VAGRANT_DIR)/$(GSELIB_VM) && vagrant ssh-config >> $@
 
 
 vm_install: $(VM_SSHCONFIG_PATH) $(ZIPFILE)
