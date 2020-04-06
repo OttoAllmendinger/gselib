@@ -17,8 +17,8 @@ MO_FILES := $(foreach lang,$(LANGUAGES),src/locale/$(lang)/LC_MESSAGES/$(NAME).m
 PO_FILES := $(foreach lang,$(LANGUAGES),src/locale/$(lang)/$(lang).po)
 PO_FILES_UNFMT := $(foreach lang,$(LANGUAGES),src/locale/$(lang)/LC_MESSAGES/unfmt)
 
-EXTENSION_PATH = $(HOME)/.local/share/gnome-shell/extensions/$(UUID)
-
+EXTENSION_PATH_RELATIVE=.local/share/gnome-shell/extensions/$(UUID)
+EXTENSION_PATH = $(HOME)/$(EXTENSION_PATH_RELATIVE)
 
 all: archive
 
@@ -49,6 +49,7 @@ install: archive
 	rm -rf $(EXTENSION_PATH)
 	mkdir -p $(EXTENSION_PATH)
 	unzip $(ZIPFILE) -d $(EXTENSION_PATH)
+
 
 src/schemas/gschemas.compiled: src/schemas/$(SCHEMA)
 	glib-compile-schemas src/schemas/
@@ -89,5 +90,26 @@ prefs: install
 
 restart:
 	gjs gselib/tools/restartShell.js
+
+
+VM_SSHCONFIG_PATH=/tmp/vagrant-ssh-config.$(GSELIB_VM)
+
+$(VM_SSHCONFIG_PATH):
+ifeq ($(GSELIB_VM),)
+	$(error please specify VM name in GSELIB_VM)
+endif
+	cd gselib/vagrant/$(GSELIB_VM) && vagrant ssh-config >> $@
+
+
+vm_install: $(VM_SSHCONFIG_PATH) $(ZIPFILE)
+	scp -F$(VM_SSHCONFIG_PATH) $(ZIPFILE) default:$(ZIPFILE)
+	ssh -F$(VM_SSHCONFIG_PATH) default '\
+		rm -rf $$HOME/$(EXTENSION_PATH_RELATIVE) && \
+		mkdir -p $$HOME/$(EXTENSION_PATH_RELATIVE) && \
+		unzip $(ZIPFILE) -d $(EXTENSION_PATH_RELATIVE) \
+	'
+
+vm_restart_gs: $(VM_SSHCONFIG_PATH)
+	ssh -F$(VM_SSHCONFIG_PATH) default 'DISPLAY=:1 gnome-shell --replace'
 
 FORCE:
