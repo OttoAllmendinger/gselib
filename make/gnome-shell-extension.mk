@@ -26,7 +26,7 @@ all: archive
 
 archive: $(ZIPFILE)
 
-$(ZIPFILE): $(SOURCE) schemas translations
+$(ZIPFILE): $(SOURCE) schemas
 	-rm $(ZIPFILE)
 	cd src && zip -r ../$(ZIPFILE) \
 	   $(patsubst src/%,%,$(SOURCE)) \
