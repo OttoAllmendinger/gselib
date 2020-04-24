@@ -64,9 +64,11 @@ Vagrant.configure("2") do |config|
   # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
+    set -euo pipefail
+    sed -i '/rackspace/!d' /etc/pacman.d/mirrorlist
     pacman --noconfirm --needed -Sy archlinux-keyring
     pacman --noconfirm --needed -Suy
-    pacman --noconfirm --needed -S base-devel zip gnome gnome-extra gdm
+    pacman --noconfirm --needed -Sy base-devel zip gnome gnome-extra gdm
     systemctl enable gdm --now
   SHELL
 end
