@@ -102,6 +102,8 @@ ifeq ($(GSELIB_VM),)
 endif
 	cd $(VAGRANT_DIR)/$(GSELIB_VM) && vagrant ssh-config >> $@
 
+vm_ssh: $(VM_SSHCONFIG_PATH)
+	$(VM_SSH)
 
 vm_install: $(VM_SSHCONFIG_PATH) $(ZIPFILE)
 	scp -F$(VM_SSHCONFIG_PATH) $(ZIPFILE) default:$(ZIPFILE)
@@ -111,7 +113,15 @@ vm_install: $(VM_SSHCONFIG_PATH) $(ZIPFILE)
 		unzip $(ZIPFILE) -d $(EXTENSION_PATH_RELATIVE) \
 	'
 
+vm_log_gs: $(VM_SSHCONFIG_PATH)
+	$(VM_SSH) 'journalctl -f /usr/bin/gnome-shell'
+
 vm_restart_gs: $(VM_SSHCONFIG_PATH)
-	ssh -F$(VM_SSHCONFIG_PATH) default 'DISPLAY=:1 gnome-shell --replace'
+	$(VM_SSH) 'DISPLAY=$(VM_DISPLAY) gnome-shell --replace'
+
+
+vm_restart_gdm: $(VM_SSHCONFIG_PATH)
+	$(VM_SSH) 'sudo systemctl restart gdm'
+
 
 FORCE:
