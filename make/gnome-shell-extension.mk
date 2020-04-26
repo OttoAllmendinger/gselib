@@ -6,9 +6,11 @@ GIT_VERSION := $(shell git describe --dirty --always)
 
 SOURCE_JAVASCRIPT=$(wildcard src/*js)
 SOURCE_JAVASCRIPT_VENDOR=$(wildcard src/vendor/*js)
+SOURCE_JAVASCRIPT_GSELIB=$(wildcard src/gselib/*js)
 
 SOURCE = $(SOURCE_JAVASCRIPT) \
 		 $(SOURCE_JAVASCRIPT_VENDOR) \
+		 $(SOURCE_JAVASCRIPT_GSELIB) \
 		 src/stylesheet.css \
 		 src/metadata.json \
 		 $(wildcard src/schemas/*)
