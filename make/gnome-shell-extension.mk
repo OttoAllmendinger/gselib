@@ -95,6 +95,7 @@ restart:
 
 
 VM_SSHCONFIG_PATH=/tmp/vagrant-ssh-config.$(GSELIB_VM)
+VM_SSH=ssh -F$(VM_SSHCONFIG_PATH) default
 
 $(VM_SSHCONFIG_PATH):
 ifeq ($(GSELIB_VM),)
