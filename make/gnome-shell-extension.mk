@@ -1,71 +1,83 @@
-.PHONY: all schemas zipfile lint translations
-
 ZIPFILE = $(NAME).zip
 
 GIT_VERSION := $(shell git describe --dirty --always)
 
-SOURCE_JAVASCRIPT=$(wildcard src/*js)
-SOURCE_JAVASCRIPT_VENDOR=$(wildcard src/vendor/*js)
-SOURCE_JAVASCRIPT_GSELIB=$(wildcard src/gselib/*js)
+SOURCE_JAVASCRIPT=$(wildcard dist/*js)
 
-SOURCE = $(SOURCE_JAVASCRIPT) \
-		 $(SOURCE_JAVASCRIPT_VENDOR) \
-		 $(SOURCE_JAVASCRIPT_GSELIB) \
-		 src/stylesheet.css \
-		 src/metadata.json \
-		 $(wildcard src/schemas/*)
+ROLLUP=NODE_OPTIONS=--max_old_space_size=4096 yarn run rollup
 
-MO_FILES := $(foreach lang,$(LANGUAGES),src/locale/$(lang)/LC_MESSAGES/$(NAME).mo)
-PO_FILES := $(foreach lang,$(LANGUAGES),src/locale/$(lang)/$(lang).po)
-PO_FILES_UNFMT := $(foreach lang,$(LANGUAGES),src/locale/$(lang)/LC_MESSAGES/unfmt)
+MO_FILES := $(foreach lang,$(LANGUAGES),res/locale/$(lang)/LC_MESSAGES/$(NAME).mo)
+PO_FILES := $(foreach lang,$(LANGUAGES),res/locale/$(lang)/$(lang).po)
+PO_FILES_UNFMT := $(foreach lang,$(LANGUAGES),res/locale/$(lang)/LC_MESSAGES/unfmt)
 
 EXTENSION_PATH_RELATIVE=.local/share/gnome-shell/extensions/$(UUID)
 EXTENSION_PATH = $(HOME)/$(EXTENSION_PATH_RELATIVE)
 
 VAGRANT_DIR ?= gselib/vagrant
 
-all: archive
+all: @types/ dist/ archive
 
+.PHONY: archive
 archive: $(ZIPFILE)
 
-$(ZIPFILE): $(SOURCE) schemas
+$(ZIPFILE): res/metadata.json schemas
 	-rm $(ZIPFILE)
-	cd src && zip -r ../$(ZIPFILE) \
-	   $(patsubst src/%,%,$(SOURCE)) \
-	   $(patsubst src/%,%,$(MO_FILES))
+	cd dist/ && zip ../$(ZIPFILE) *.js
+	cd res && zip ../$(ZIPFILE) \
+	    * \
+	    schemas/* \
+        $(patsubst res/%,%,$(MO_FILES))
 
-src/metadata.json: FORCE
-	sed 's/_gitversion_/$(GIT_VERSION)/' src/metadata.json.in > src/metadata.json
+.PHONY: @types/
+@types/:
+	rm -rf @types/
+	./ts-for-gjs/bin/run generate --configName=./.ts-for-girrc.js > /dev/null 2>&1
 
-schemas: src/schemas/gschemas.compiled
+.PHONY: dist/
+dist/:
+	$(ROLLUP) -c
 
+.PHONY: watch
+watch:
+	$(ROLLUP) -c --watch
+
+res/metadata.json: src/metadata.json.in
+	sed 's/_gitversion_/$(GIT_VERSION)/' $< > $@
+
+.PHONY: schemas
+schemas: res/schemas/gschemas.compiled
+
+.PHONY: lint
 lint:
-	eslint src/*js
+	yarn run eslint
 
+.PHONY: package
 package:
 	make lint
 	make archive
 
+.PHONY: uninstall
 uninstall:
 	rm -rf $(EXTENSION_PATH)
 
+.PHONY: install
 install: archive
 	rm -rf $(EXTENSION_PATH)
 	mkdir -p $(EXTENSION_PATH)
 	unzip $(ZIPFILE) -d $(EXTENSION_PATH)
 
 
-src/schemas/gschemas.compiled: src/schemas/$(SCHEMA)
-	glib-compile-schemas src/schemas/
+res/schemas/gschemas.compiled: res/schemas/$(SCHEMA)
+	glib-compile-schemas res/schemas/
 
 
+.PHONY: translations
 translations: $(MO_FILES)
 
-
-src/locale/%/LC_MESSAGES/$(NAME).mo: src/locale/%/*.po $(PO_FILES)
+res/locale/%/LC_MESSAGES/$(NAME).mo: res/locale/%/*.po $(PO_FILES)
 	@msgfmt $(wildcard $<) --output-file=$@
 
-src/locale/%.po: src/locale/$(NAME).pot
+res/locale/%.po: res/locale/$(NAME).pot
 	@# NOTE sometimes --no-fuzzy-matching is better
 	@if [ -e $@ ]; then \
 		echo "merging translations for $@"; \
@@ -79,19 +91,21 @@ src/locale/%.po: src/locale/$(NAME).pot
 		  --locale=%.utf8; \
 	fi
 
-src/locale/$(NAME).pot: FORCE
+res/locale/$(NAME).pot: FORCE
 	xgettext --from-code=UTF-8 -k_ -kN_ -o $@ $(sort $(SOURCE_JAVASCRIPT))
 	sed -i '/^"POT-Creation-Date/d' $@
 
+.PHONY: unfmt
 unfmt: $(PO_FILES_UNFMT)
 
-src/locale/%/LC_MESSAGES/unfmt: src/locale/%/LC_MESSAGES/$(NAME).mo
+res/locale/%/LC_MESSAGES/unfmt: res/locale/%/LC_MESSAGES/$(NAME).mo
 	msgunfmt $< --output-file=$@
 
-
+.PHONY: prefs
 prefs: install
 	gnome-shell-extension-prefs $(UUID)
 
+.PHONY: restart
 restart:
 	gjs gselib/tools/restartShell.js
 
@@ -105,9 +119,11 @@ ifeq ($(GSELIB_VM),)
 endif
 	cd $(VAGRANT_DIR)/$(GSELIB_VM) && vagrant ssh-config >> $@
 
+.PHONY: vm_ssh
 vm_ssh: $(VM_SSHCONFIG_PATH)
 	$(VM_SSH)
 
+.PHONY: vm_install
 vm_install: $(VM_SSHCONFIG_PATH) $(ZIPFILE)
 	scp -F$(VM_SSHCONFIG_PATH) $(ZIPFILE) default:$(ZIPFILE)
 	ssh -F$(VM_SSHCONFIG_PATH) default '\
@@ -116,15 +132,28 @@ vm_install: $(VM_SSHCONFIG_PATH) $(ZIPFILE)
 		unzip $(ZIPFILE) -d $(EXTENSION_PATH_RELATIVE) \
 	'
 
-vm_log_gs: $(VM_SSHCONFIG_PATH)
+.PHONY: vm_log_gs
+vm_gs_logs: $(VM_SSHCONFIG_PATH)
 	$(VM_SSH) 'journalctl -f /usr/bin/gnome-shell'
 
-vm_restart_gs: $(VM_SSHCONFIG_PATH)
+.PHONY: vm_gs_logout
+vm_gs_logout:
+	$(VM_SSH) 'gnome-session-quit --force'
+
+.PHONY: vm_gs_restart
+vm_gs_restart: $(VM_SSHCONFIG_PATH)
 	$(VM_SSH) 'DISPLAY=$(VM_DISPLAY) gnome-shell --replace'
 
-
-vm_restart_gdm: $(VM_SSHCONFIG_PATH)
+.PHONY: vm_gdm_restart
+vm_gdm_restart: $(VM_SSHCONFIG_PATH)
 	$(VM_SSH) 'sudo systemctl restart gdm'
 
+.PHONY: vm_gs_version
+vm_gs_version: $(VM_SSHCONFIG_PATH)
+	$(VM_SSH) 'gnome-shell --version'
+
+.PHONY: vm_ssh_exec
+vm_ssh_exec:
+	$(VM_SSH) $(VM_SSH_COMMAND)
 
 FORCE:
