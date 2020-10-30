@@ -35,6 +35,7 @@ $(ZIPFILE): res/metadata.json schemas
 
 .PHONY: dist/
 dist/:
+	git clean -fx src/
 	$(ROLLUP) -c
 
 .PHONY: watch
