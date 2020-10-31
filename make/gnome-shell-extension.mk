@@ -33,6 +33,14 @@ $(ZIPFILE): res/metadata.json schemas
 	rm -rf @types/
 	./ts-for-gjs/bin/run generate --configName=./.ts-for-girrc.js > /dev/null 2>&1
 
+.PHONY: clean_src
+clean_src:
+	git clean -fx src/
+
+.PHONY: check
+check:
+	yarn run tsc --outDir build/
+
 .PHONY: dist/
 dist/:
 	git clean -fx src/
@@ -50,7 +58,7 @@ schemas: res/schemas/gschemas.compiled
 
 .PHONY: lint
 lint:
-	yarn run eslint
+	yarn run eslint ./src
 
 .PHONY: package
 package:
