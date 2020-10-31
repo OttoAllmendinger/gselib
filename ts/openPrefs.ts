@@ -26,9 +26,13 @@ const GnomeShellIface = `
  * ```
  */
 export function openPrefsDBus(uuid, params: { modal?: boolean; parent?: string } = {}) {
-  const GnomeShellProxy = Gio.DBusProxy.makeProxyWrapper(GnomeShellIface);
+  const GnomeShellProxy = (Gio.DBusProxy as any).makeProxyWrapper(GnomeShellIface);
 
-  const shellProxy = new GnomeShellProxy(Gio.DBus.session, 'org.gnome.Shell.Extensions', '/org/gnome/Shell/Extensions');
+  const shellProxy = new GnomeShellProxy(
+    (Gio as any).DBus.session,
+    'org.gnome.Shell.Extensions',
+    '/org/gnome/Shell/Extensions',
+  );
 
   const parent = params.parent === undefined ? '' : params.parent;
   const modal = params.modal === undefined ? true : params.modal;
