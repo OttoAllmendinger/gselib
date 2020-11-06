@@ -1,3 +1,7 @@
+EXECUTABLES = npm yarn
+K := $(foreach exec,$(EXECUTABLES),\
+        $(if $(shell which $(exec)),XXXX,$(error "No $(exec) in PATH")))
+
 ZIPFILE = $(NAME).zip
 
 GIT_VERSION := $(shell git describe --dirty --always)
