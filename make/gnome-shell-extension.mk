@@ -109,8 +109,7 @@ res/locale/%.po: res/locale/$(NAME).pot
 	fi
 
 res/locale/$(NAME).pot: FORCE
-	xgettext --from-code=UTF-8 -k_ -kN_ -o $@ $(sort $(SOURCE_JAVASCRIPT))
-	sed -i '/^"POT-Creation-Date/d' $@
+	yarn run ts-node gselib/tools/gettext.ts $@
 
 .PHONY: unfmt
 unfmt: $(PO_FILES_UNFMT)
