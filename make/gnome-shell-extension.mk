@@ -1,7 +1,3 @@
-EXECUTABLES = npm yarn
-K := $(foreach exec,$(EXECUTABLES),\
-        $(if $(shell which $(exec)),XXXX,$(error "No $(exec) in PATH")))
-
 ZIPFILE = $(NAME).zip
 
 GIT_VERSION := $(shell git describe --dirty --always)
@@ -19,7 +15,9 @@ EXTENSION_PATH = $(HOME)/$(EXTENSION_PATH_RELATIVE)
 
 VAGRANT_DIR ?= gselib/vagrant
 
-all: node_modules @types/ dist/ archive
+all: archive
+
+build: node_modules @types/ dist/ archive
 
 node_modules:
 	yarn install
