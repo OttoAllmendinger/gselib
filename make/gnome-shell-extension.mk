@@ -59,7 +59,7 @@ watch:
 	$(ROLLUP) -c --watch
 
 res/metadata.json: FORCE
-	sed 's/_gitversion_/$(GIT_VERSION)/' src/metadata.json.in > $@
+	sed 's/_gitversion_/$(GIT_VERSION)/' src/metadata.json > $@
 
 .PHONY: schemas
 schemas: res/schemas/gschemas.compiled
