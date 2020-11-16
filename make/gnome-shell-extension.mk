@@ -66,7 +66,7 @@ schemas: res/schemas/gschemas.compiled
 
 .PHONY: lint
 lint:
-	yarn run eslint ./src
+	yarn run eslint ./src --quiet
 
 .PHONY: package
 package:
