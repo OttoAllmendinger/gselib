@@ -153,6 +153,10 @@ vm_install: $(VM_SSHCONFIG_PATH) $(ZIPFILE)
 vm_gs_logs: $(VM_SSHCONFIG_PATH)
 	$(VM_SSH) 'journalctl -f /usr/bin/gnome-shell'
 
+.PHONY: vm_gjs_logs
+vm_gjs_logs: $(VM_SSHCONFIG_PATH)
+	$(VM_SSH) 'journalctl -f /usr/bin/gjs'
+
 .PHONY: vm_gs_logout
 vm_gs_logout:
 	$(VM_SSH) 'gnome-session-quit --force'
