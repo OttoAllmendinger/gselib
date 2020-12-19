@@ -83,10 +83,14 @@ install: archive
 	mkdir -p $(EXTENSION_PATH)
 	unzip $(ZIPFILE) -d $(EXTENSION_PATH)
 
-
+GSCHEMA_STDERR=/tmp/glib-compile-schemas-stderr.log
 res/schemas/gschemas.compiled: res/schemas/$(SCHEMA)
-	glib-compile-schemas res/schemas/
-
+	glib-compile-schemas res/schemas/ 2> $(GSCHEMA_STDERR)
+	@if [ -s $(GSCHEMA_STDERR) ]; then \
+  		cat $(GSCHEMA_STDERR); exit 2; \
+  	else \
+		rm $(GSCHEMA_STDERR); \
+	fi
 
 .PHONY: translations
 translations: $(MO_FILES)
