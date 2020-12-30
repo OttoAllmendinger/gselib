@@ -1,13 +1,15 @@
 import * as Gio from '@imports/Gio-2.0';
 
-import { uuid } from '../metadata.json';
+import metadata from '../metadata.json';
 
-export const _ = imports.gettext.domain(uuid).gettext;
+const domain = metadata['gettext-domain'];
+
+export const _ = imports.gettext.domain(domain).gettext;
 
 export function init(extensionDir) {
   const workDir = Gio.File.new_for_path(extensionDir);
   const localeDir = workDir.get_child('locale');
   if (localeDir.query_exists(null)) {
-    imports.gettext.bindtextdomain(uuid, localeDir.get_path());
+    imports.gettext.bindtextdomain(domain, localeDir.get_path());
   }
 }
