@@ -13,7 +13,7 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@imports/*": ["../@types/Gjs/*"]
+      "@imports/*": ["../@types/3/Gjs/*", "../@types/4/Gjs/*"]
     }
   },
   "include": [

@@ -8,7 +8,9 @@ export const buildPath = 'dist';
 const globals = {
   '@imports/Gio-2.0': 'imports.gi.Gio',
   '@imports/Gdk-3.0': 'imports.gi.Gdk',
+  '@imports/Gdk-4.0': 'imports.gi.Gdk',
   '@imports/Gtk-3.0': 'imports.gi.Gtk',
+  '@imports/Gtk-4.0': 'imports.gi.Gtk',
   '@imports/GdkPixbuf-2.0': 'imports.gi.GdkPixbuf',
   '@imports/GObject-2.0': 'imports.gi.GObject',
   '@imports/GLib-2.0': 'imports.gi.GLib',
