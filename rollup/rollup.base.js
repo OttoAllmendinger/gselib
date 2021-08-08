@@ -16,10 +16,10 @@ const globals = {
   '@imports/GLib-2.0': 'imports.gi.GLib',
   '@imports/St-1.0': 'imports.gi.St',
   '@imports/Shell-0.1': 'imports.gi.Shell',
-  '@imports/Meta-7': 'imports.gi.Meta',
+  '@imports/Meta-8': 'imports.gi.Meta',
   '@imports/Wnck-3.0': 'imports.gi.Wnck',
-  '@imports/Cogl-7': 'imports.gi.Cogl',
-  '@imports/Clutter-7': 'imports.gi.Clutter',
+  '@imports/Cogl-8': 'imports.gi.Cogl',
+  '@imports/Clutter-8': 'imports.gi.Clutter',
   '@imports/Soup-2.4': 'imports.gi.Soup',
 };
 

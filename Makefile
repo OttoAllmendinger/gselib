@@ -7,7 +7,7 @@ TS_FOR_GJS=./ts-for-gjs/bin/run generate \
 TS_FOR_GJS_ARGS=\
 		--environments=gjs \
 		--girDirectories=/usr/share/gir-1.0 \
-		--girDirectories=/usr/lib/mutter-7 \
+		--girDirectories=/usr/lib/mutter-8 \
 		--girDirectories=/usr/share/gnome-shell
 
 .PHONY: @types/

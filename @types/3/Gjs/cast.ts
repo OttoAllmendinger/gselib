@@ -2442,6 +2442,8 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Container',
     'Clutter.Scriptable',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.BorderImage': [
     'GObject.Object',
@@ -2455,6 +2457,8 @@ const inheritanceTable: { [key: string]: string[] } = {
     'St.Scrollable',
     'St.Widget',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.Button': [
     'St.Bin',
@@ -2464,6 +2468,8 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Scriptable',
     'St.Widget',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.Clipboard': [
     'GObject.Object',
@@ -2475,6 +2481,8 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Container',
     'Clutter.Scriptable',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.Entry': [
     'St.Widget',
@@ -2483,6 +2491,8 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Container',
     'Clutter.Scriptable',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.FocusManager': [
     'GObject.Object',
@@ -2493,6 +2503,9 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Atk.Component',
     'Atk.Value',
     'Cally.Actor',
+    'Atk.GObjectAccessible',
+    'Atk.Object',
+    'GObject.Object',
 ],
     'St.Icon': [
     'St.Widget',
@@ -2501,12 +2514,15 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Container',
     'Clutter.Scriptable',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.ImageContent': [
     'Clutter.Image',
     'Clutter.Content',
     'Gio.Icon',
     'Gio.LoadableIcon',
+    'GObject.Object',
 ],
     'St.Label': [
     'St.Widget',
@@ -2515,6 +2531,8 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Container',
     'Clutter.Scriptable',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.PasswordEntry': [
     'St.Entry',
@@ -2524,6 +2542,8 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Scriptable',
     'St.Widget',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.ScrollBar': [
     'St.Widget',
@@ -2532,6 +2552,8 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Container',
     'Clutter.Scriptable',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.ScrollView': [
     'St.Bin',
@@ -2541,9 +2563,16 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Scriptable',
     'St.Widget',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.ScrollViewFade': [
     'Clutter.ShaderEffect',
+    'Clutter.OffscreenEffect',
+    'Clutter.Effect',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.Settings': [
     'GObject.Object',
@@ -2568,6 +2597,8 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Scriptable',
     'St.Scrollable',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.Widget': [
     'Clutter.Actor',
@@ -2575,11 +2606,16 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Animatable',
     'Clutter.Container',
     'Clutter.Scriptable',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'St.WidgetAccessible': [
     'Cally.Actor',
     'Atk.Action',
     'Atk.Component',
+    'Atk.GObjectAccessible',
+    'Atk.Object',
+    'GObject.Object',
 ],
     'Shell.App': [
     'GObject.Object',
@@ -2592,6 +2628,9 @@ const inheritanceTable: { [key: string]: string[] } = {
 ],
     'Shell.BlurEffect': [
     'Clutter.Effect',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'Shell.EmbeddedWindow': [
     'Gtk.Window',
@@ -2605,6 +2644,10 @@ const inheritanceTable: { [key: string]: string[] } = {
 ],
     'Shell.GLSLEffect': [
     'Clutter.OffscreenEffect',
+    'Clutter.Effect',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'Shell.Global': [
     'GObject.Object',
@@ -2615,9 +2658,16 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Animatable',
     'Clutter.Container',
     'Clutter.Scriptable',
+    'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'Shell.InvertLightnessEffect': [
     'Clutter.OffscreenEffect',
+    'Clutter.Effect',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'Shell.KeyringPrompt': [
     'GObject.Object',
@@ -2645,6 +2695,7 @@ const inheritanceTable: { [key: string]: string[] } = {
 ],
     'Shell.SecureTextBuffer': [
     'Clutter.TextBuffer',
+    'GObject.Object',
 ],
     'Shell.SquareBin': [
     'St.Bin',
@@ -2654,6 +2705,8 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Scriptable',
     'St.Widget',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'Shell.Stack': [
     'St.Widget',
@@ -2662,6 +2715,8 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Container',
     'Clutter.Scriptable',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'Shell.TrayIcon': [
     'Shell.GtkEmbed',
@@ -2670,6 +2725,9 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Container',
     'Clutter.Scriptable',
     'Clutter.Clone',
+    'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'Shell.TrayManager': [
     'GObject.Object',
@@ -2684,9 +2742,13 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Clutter.Container',
     'Clutter.Scriptable',
     'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'Shell.WindowPreviewLayout': [
     'Clutter.LayoutManager',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
 ],
     'Shell.WindowTracker': [
     'GObject.Object',
@@ -3295,6 +3357,595 @@ const inheritanceTable: { [key: string]: string[] } = {
 ],
     'GdkPixbuf.PixbufSimpleAnimIter': [
     'GdkPixbuf.PixbufAnimationIter',
+    'GObject.Object',
+],
+    'Meta.Backend': [
+    'GObject.Object',
+    'Gio.Initable',
+],
+    'Meta.Background': [
+    'GObject.Object',
+],
+    'Meta.BackgroundActor': [
+    'Clutter.Actor',
+    'Atk.ImplementorIface',
+    'Clutter.Animatable',
+    'Clutter.Container',
+    'Clutter.Scriptable',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Meta.BackgroundContent': [
+    'GObject.Object',
+    'Clutter.Content',
+],
+    'Meta.BackgroundGroup': [
+    'Clutter.Actor',
+    'Atk.ImplementorIface',
+    'Clutter.Animatable',
+    'Clutter.Container',
+    'Clutter.Scriptable',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Meta.BackgroundImage': [
+    'GObject.Object',
+],
+    'Meta.BackgroundImageCache': [
+    'GObject.Object',
+],
+    'Meta.Barrier': [
+    'GObject.Object',
+],
+    'Meta.Compositor': [
+    'GObject.Object',
+],
+    'Meta.CursorTracker': [
+    'GObject.Object',
+],
+    'Meta.Display': [
+    'GObject.Object',
+],
+    'Meta.Dnd': [
+    'GObject.Object',
+],
+    'Meta.IdleMonitor': [
+    'GObject.Object',
+],
+    'Meta.LaunchContext': [
+    'Gio.AppLaunchContext',
+    'GObject.Object',
+],
+    'Meta.MonitorManager': [
+    'GObject.Object',
+],
+    'Meta.Plugin': [
+    'GObject.Object',
+],
+    'Meta.RemoteAccessController': [
+    'GObject.Object',
+],
+    'Meta.RemoteAccessHandle': [
+    'GObject.Object',
+],
+    'Meta.Selection': [
+    'GObject.Object',
+],
+    'Meta.SelectionSource': [
+    'GObject.Object',
+],
+    'Meta.SelectionSourceMemory': [
+    'Meta.SelectionSource',
+    'GObject.Object',
+],
+    'Meta.ShadowFactory': [
+    'GObject.Object',
+],
+    'Meta.ShapedTexture': [
+    'GObject.Object',
+    'Clutter.Content',
+],
+    'Meta.SoundPlayer': [
+    'GObject.Object',
+],
+    'Meta.Stage': [
+    'Clutter.Stage',
+    'Atk.ImplementorIface',
+    'Clutter.Animatable',
+    'Clutter.Container',
+    'Clutter.Scriptable',
+    'Clutter.Actor',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Meta.StartupNotification': [
+    'GObject.Object',
+],
+    'Meta.StartupSequence': [
+    'GObject.Object',
+],
+    'Meta.WaylandClient': [
+    'GObject.Object',
+],
+    'Meta.Window': [
+    'GObject.Object',
+],
+    'Meta.WindowActor': [
+    'Clutter.Actor',
+    'Atk.ImplementorIface',
+    'Clutter.Animatable',
+    'Clutter.Container',
+    'Clutter.Scriptable',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Meta.WindowGroup': [
+    'Clutter.Actor',
+    'Atk.ImplementorIface',
+    'Clutter.Animatable',
+    'Clutter.Container',
+    'Clutter.Scriptable',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Meta.Workspace': [
+    'GObject.Object',
+],
+    'Meta.WorkspaceManager': [
+    'GObject.Object',
+],
+    'Meta.X11Display': [
+    'GObject.Object',
+],
+    'Clutter.Action': [
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.Actor': [
+    'GObject.InitiallyUnowned',
+    'Atk.ImplementorIface',
+    'Clutter.Animatable',
+    'Clutter.Container',
+    'Clutter.Scriptable',
+    'GObject.Object',
+],
+    'Clutter.ActorMeta': [
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.ActorNode': [
+    'Clutter.PaintNode',
+],
+    'Clutter.AlignConstraint': [
+    'Clutter.Constraint',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.Backend': [
+    'GObject.Object',
+],
+    'Clutter.BinLayout': [
+    'Clutter.LayoutManager',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.BindConstraint': [
+    'Clutter.Constraint',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.BindingPool': [
+    'GObject.Object',
+],
+    'Clutter.BlitNode': [
+    'Clutter.PaintNode',
+],
+    'Clutter.BlurEffect': [
+    'Clutter.OffscreenEffect',
+    'Clutter.Effect',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.BlurNode': [
+    'Clutter.LayerNode',
+    'Clutter.PaintNode',
+],
+    'Clutter.BoxLayout': [
+    'Clutter.LayoutManager',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.BrightnessContrastEffect': [
+    'Clutter.OffscreenEffect',
+    'Clutter.Effect',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.Canvas': [
+    'GObject.Object',
+    'Clutter.Content',
+],
+    'Clutter.ChildMeta': [
+    'GObject.Object',
+],
+    'Clutter.ClickAction': [
+    'Clutter.Action',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.ClipNode': [
+    'Clutter.PaintNode',
+],
+    'Clutter.Clone': [
+    'Clutter.Actor',
+    'Atk.ImplementorIface',
+    'Clutter.Animatable',
+    'Clutter.Container',
+    'Clutter.Scriptable',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.ColorNode': [
+    'Clutter.PipelineNode',
+    'Clutter.PaintNode',
+],
+    'Clutter.ColorizeEffect': [
+    'Clutter.OffscreenEffect',
+    'Clutter.Effect',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.Constraint': [
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.DeformEffect': [
+    'Clutter.OffscreenEffect',
+    'Clutter.Effect',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.DesaturateEffect': [
+    'Clutter.OffscreenEffect',
+    'Clutter.Effect',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.Effect': [
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.FixedLayout': [
+    'Clutter.LayoutManager',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.FlowLayout': [
+    'Clutter.LayoutManager',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.FrameClock': [
+    'GObject.Object',
+],
+    'Clutter.GestureAction': [
+    'Clutter.Action',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.GridLayout': [
+    'Clutter.LayoutManager',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.Image': [
+    'GObject.Object',
+    'Clutter.Content',
+],
+    'Clutter.InputDevice': [
+    'GObject.Object',
+],
+    'Clutter.InputDeviceTool': [
+    'GObject.Object',
+],
+    'Clutter.InputFocus': [
+    'GObject.Object',
+],
+    'Clutter.InputMethod': [
+    'GObject.Object',
+],
+    'Clutter.Interval': [
+    'GObject.InitiallyUnowned',
+    'Clutter.Scriptable',
+    'GObject.Object',
+],
+    'Clutter.KeyframeTransition': [
+    'Clutter.PropertyTransition',
+    'Clutter.Scriptable',
+    'Clutter.Transition',
+    'Clutter.Timeline',
+    'GObject.Object',
+],
+    'Clutter.Keymap': [
+    'GObject.Object',
+],
+    'Clutter.LayerNode': [
+    'Clutter.PaintNode',
+],
+    'Clutter.LayoutManager': [
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.LayoutMeta': [
+    'Clutter.ChildMeta',
+    'GObject.Object',
+],
+    'Clutter.OffscreenEffect': [
+    'Clutter.Effect',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.PageTurnEffect': [
+    'Clutter.DeformEffect',
+    'Clutter.OffscreenEffect',
+    'Clutter.Effect',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.PanAction': [
+    'Clutter.GestureAction',
+    'Clutter.Action',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.ParamSpecColor': [
+    'GObject.ParamSpec',
+],
+    'Clutter.ParamSpecUnit': [
+    'GObject.ParamSpec',
+],
+    'Clutter.Path': [
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.PathConstraint': [
+    'Clutter.Constraint',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.PipelineNode': [
+    'Clutter.PaintNode',
+],
+    'Clutter.PropertyTransition': [
+    'Clutter.Transition',
+    'Clutter.Scriptable',
+    'Clutter.Timeline',
+    'GObject.Object',
+],
+    'Clutter.RootNode': [
+    'Clutter.PaintNode',
+],
+    'Clutter.RotateAction': [
+    'Clutter.GestureAction',
+    'Clutter.Action',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.Script': [
+    'GObject.Object',
+],
+    'Clutter.ScrollActor': [
+    'Clutter.Actor',
+    'Atk.ImplementorIface',
+    'Clutter.Animatable',
+    'Clutter.Container',
+    'Clutter.Scriptable',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.Seat': [
+    'GObject.Object',
+],
+    'Clutter.Settings': [
+    'GObject.Object',
+],
+    'Clutter.ShaderEffect': [
+    'Clutter.OffscreenEffect',
+    'Clutter.Effect',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.SnapConstraint': [
+    'Clutter.Constraint',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.Stage': [
+    'Clutter.Actor',
+    'Atk.ImplementorIface',
+    'Clutter.Animatable',
+    'Clutter.Container',
+    'Clutter.Scriptable',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.StageManager': [
+    'GObject.Object',
+],
+    'Clutter.StageView': [
+    'GObject.Object',
+],
+    'Clutter.SwipeAction': [
+    'Clutter.GestureAction',
+    'Clutter.Action',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.TapAction': [
+    'Clutter.GestureAction',
+    'Clutter.Action',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.Text': [
+    'Clutter.Actor',
+    'Atk.ImplementorIface',
+    'Clutter.Animatable',
+    'Clutter.Container',
+    'Clutter.Scriptable',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Clutter.TextBuffer': [
+    'GObject.Object',
+],
+    'Clutter.TextNode': [
+    'Clutter.PaintNode',
+],
+    'Clutter.TextureNode': [
+    'Clutter.PipelineNode',
+    'Clutter.PaintNode',
+],
+    'Clutter.Timeline': [
+    'GObject.Object',
+    'Clutter.Scriptable',
+],
+    'Clutter.TransformNode': [
+    'Clutter.PaintNode',
+],
+    'Clutter.Transition': [
+    'Clutter.Timeline',
+    'Clutter.Scriptable',
+    'GObject.Object',
+],
+    'Clutter.TransitionGroup': [
+    'Clutter.Transition',
+    'Clutter.Scriptable',
+    'Clutter.Timeline',
+    'GObject.Object',
+],
+    'Clutter.VirtualInputDevice': [
+    'GObject.Object',
+],
+    'Clutter.ZoomAction': [
+    'Clutter.GestureAction',
+    'Clutter.Action',
+    'Clutter.ActorMeta',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Cally.Actor': [
+    'Atk.GObjectAccessible',
+    'Atk.Action',
+    'Atk.Component',
+    'Atk.Object',
+    'GObject.Object',
+],
+    'Cally.Clone': [
+    'Cally.Actor',
+    'Atk.Action',
+    'Atk.Component',
+    'Atk.GObjectAccessible',
+    'Atk.Object',
+    'GObject.Object',
+],
+    'Cally.Root': [
+    'Atk.GObjectAccessible',
+    'Atk.Object',
+    'GObject.Object',
+],
+    'Cally.Stage': [
+    'Cally.Actor',
+    'Atk.Action',
+    'Atk.Component',
+    'Atk.Window',
+    'Atk.GObjectAccessible',
+    'Atk.Object',
+    'GObject.Object',
+],
+    'Cally.Text': [
+    'Cally.Actor',
+    'Atk.Action',
+    'Atk.Component',
+    'Atk.EditableText',
+    'Atk.Text',
+    'Atk.GObjectAccessible',
+    'Atk.Object',
+    'GObject.Object',
+],
+    'Cally.Util': [
+    'Atk.Util',
+    'GObject.Object',
+],
+    'CoglPango.Renderer': [
+    'Pango.Renderer',
+    'GObject.Object',
+],
+    'Cogl.Bitmap': [
+    'Cogl.Object',
+],
+    'Cogl.Context': [
+    'Cogl.Object',
+],
+    'Cogl.FrameInfo': [
+    'Cogl.Object',
+],
+    'Cogl.Framebuffer': [
+    'GObject.Object',
+],
+    'Cogl.Offscreen': [
+    'Cogl.Framebuffer',
+    'GObject.Object',
+],
+    'Cogl.Onscreen': [
+    'Cogl.Framebuffer',
+    'GObject.Object',
+],
+    'Cogl.Pipeline': [
+    'Cogl.Object',
+],
+    'Cogl.Texture2D': [
+    'Cogl.Object',
+    'Cogl.Texture',
+],
+    'Cogl.Texture2DSliced': [
+    'Cogl.Object',
+    'Cogl.Texture',
+],
+    'Json.Builder': [
+    'GObject.Object',
+],
+    'Json.Generator': [
+    'GObject.Object',
+],
+    'Json.Parser': [
+    'GObject.Object',
+],
+    'Json.Path': [
+    'GObject.Object',
+],
+    'Json.Reader': [
     'GObject.Object',
 ],
     'PolkitAgent.Listener': [

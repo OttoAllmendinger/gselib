@@ -14,10 +14,22 @@ import * as GdkPixbuf20 from "./GdkPixbuf-2.0";
 import * as GLib20 from "./GLib-2.0";
 import * as HarfBuzz00 from "./HarfBuzz-0.0";
 import * as GModule20 from "./GModule-2.0";
+import * as Meta8 from "./Meta-8";
+import * as Clutter8 from "./Clutter-8";
+import * as Cally8 from "./Cally-8";
+import * as Xfixes40 from "./xfixes-4.0";
+import * as GDesktopEnums30 from "./GDesktopEnums-3.0";
+import * as CoglPango8 from "./CoglPango-8";
+import * as Cogl8 from "./Cogl-8";
+import * as Json10 from "./Json-1.0";
+import * as GL10 from "./GL-1.0";
+import * as PangoCairo10 from "./PangoCairo-1.0";
+import * as Graphene10 from "./Graphene-1.0";
 import * as PolkitAgent10 from "./PolkitAgent-1.0";
 import * as NM10 from "./NM-1.0";
 import * as Gvc10 from "./Gvc-1.0";
 import * as Gcr3 from "./Gcr-3";
+import * as ClutterX118 from "./ClutterX11-8";
 import * as Polkit10 from "./Polkit-1.0";
 import * as Gck1 from "./Gck-1";
 
@@ -46,10 +58,22 @@ declare global {
           GLib: typeof GLib20
           HarfBuzz: typeof HarfBuzz00
           GModule: typeof GModule20
+          Meta: typeof Meta8
+          Clutter: typeof Clutter8
+          Cally: typeof Cally8
+          xfixes: typeof Xfixes40
+          GDesktopEnums: typeof GDesktopEnums30
+          CoglPango: typeof CoglPango8
+          Cogl: typeof Cogl8
+          Json: typeof Json10
+          GL: typeof GL10
+          PangoCairo: typeof PangoCairo10
+          Graphene: typeof Graphene10
           PolkitAgent: typeof PolkitAgent10
           NM: typeof NM10
           Gvc: typeof Gvc10
           Gcr: typeof Gcr3
+          ClutterX11: typeof ClutterX118
           Polkit: typeof Polkit10
           Gck: typeof Gck1
         }
@@ -69,10 +93,22 @@ declare global {
             GLib: string
             HarfBuzz: string
             GModule: string
+            Meta: string
+            Clutter: string
+            Cally: string
+            xfixes: string
+            GDesktopEnums: string
+            CoglPango: string
+            Cogl: string
+            Json: string
+            GL: string
+            PangoCairo: string
+            Graphene: string
             PolkitAgent: string
             NM: string
             Gvc: string
             Gcr: string
+            ClutterX11: string
             Polkit: string
             Gck: string
         }
