@@ -5056,4 +5056,4 @@ export class Event {
     static peek(): Event | null
     static request_motions(event: EventMotion): void
 }
-type XEvent = void
+export type XEvent = void

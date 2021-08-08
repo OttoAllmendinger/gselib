@@ -44,12 +44,8 @@ export enum RayIntersectionKind {
     ENTER,
     LEAVE,
 }
-export const HAS_GCC: number
-export const HAS_SCALAR: number
-export const HAS_SSE: number
 export const PI: number
 export const PI_2: number
-export const SIMD_S: string
 export const VEC2_LEN: number
 export const VEC3_LEN: number
 export const VEC4_LEN: number

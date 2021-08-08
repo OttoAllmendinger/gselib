@@ -4,11 +4,11 @@
 
 import * as Gjs from './Gjs';
 import * as cairo from './cairo-1.0';
+import * as PangoCairo from './PangoCairo-1.0';
 import * as Pango from './Pango-1.0';
 import * as HarfBuzz from './HarfBuzz-0.0';
 import * as GObject from './GObject-2.0';
 import * as GLib from './GLib-2.0';
-import * as Graphene from './Graphene-1.0';
 import * as Gio from './Gio-2.0';
 import * as GdkPixbuf from './GdkPixbuf-2.0';
 import * as GModule from './GModule-2.0';
@@ -2629,6 +2629,7 @@ export class DevicePad {
     get_seat(): Seat
     get_source(): InputSource
     get_surface_at_position(): [ /* returnType */ Surface | null, /* win_x */ number | null, /* win_y */ number | null ]
+    get_timestamp(): number
     get_vendor_id(): string | null
     /* Methods of GObject.Object */
     bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
@@ -2735,7 +2736,7 @@ export class DragSurface {
     set_device_cursor(device: Device, cursor: Cursor): void
     set_input_region(region: cairo.Region): void
     set_opaque_region(region?: cairo.Region | null): void
-    translate_coordinates(to: Surface, x: number, y: number): boolean
+    translate_coordinates(to: Surface, x: number, y: number): [ /* returnType */ boolean, /* x */ number, /* y */ number ]
     /* Methods of GObject.Object */
     bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
     bind_property_full(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags, transform_to: GObject.Closure, transform_from: GObject.Closure): GObject.Binding
@@ -2879,7 +2880,7 @@ export class Popup {
     set_device_cursor(device: Device, cursor: Cursor): void
     set_input_region(region: cairo.Region): void
     set_opaque_region(region?: cairo.Region | null): void
-    translate_coordinates(to: Surface, x: number, y: number): boolean
+    translate_coordinates(to: Surface, x: number, y: number): [ /* returnType */ boolean, /* x */ number, /* y */ number ]
     /* Methods of GObject.Object */
     bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
     bind_property_full(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags, transform_to: GObject.Closure, transform_from: GObject.Closure): GObject.Binding
@@ -3022,7 +3023,7 @@ export class Toplevel {
     set_device_cursor(device: Device, cursor: Cursor): void
     set_input_region(region: cairo.Region): void
     set_opaque_region(region?: cairo.Region | null): void
-    translate_coordinates(to: Surface, x: number, y: number): boolean
+    translate_coordinates(to: Surface, x: number, y: number): [ /* returnType */ boolean, /* x */ number, /* y */ number ]
     /* Methods of GObject.Object */
     bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
     bind_property_full(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags, transform_to: GObject.Closure, transform_from: GObject.Closure): GObject.Binding
@@ -3753,6 +3754,7 @@ export class Device {
     get_seat(): Seat
     get_source(): InputSource
     get_surface_at_position(): [ /* returnType */ Surface | null, /* win_x */ number | null, /* win_y */ number | null ]
+    get_timestamp(): number
     get_vendor_id(): string | null
     /* Methods of GObject.Object */
     bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
@@ -5047,7 +5049,7 @@ export class Surface {
     set_device_cursor(device: Device, cursor: Cursor): void
     set_input_region(region: cairo.Region): void
     set_opaque_region(region?: cairo.Region | null): void
-    translate_coordinates(to: Surface, x: number, y: number): boolean
+    translate_coordinates(to: Surface, x: number, y: number): [ /* returnType */ boolean, /* x */ number, /* y */ number ]
     /* Methods of GObject.Object */
     bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
     bind_property_full(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags, transform_to: GObject.Closure, transform_from: GObject.Closure): GObject.Binding
@@ -5334,7 +5336,7 @@ export class ContentFormats {
     contain_gtype(type: GObject.Type): boolean
     contain_mime_type(mime_type: string): boolean
     get_gtypes(): GObject.Type[] | null
-    get_mime_types(): [ /* returnType */ string[] | null, /* n_mime_types */ number | null ]
+    get_mime_types(): string[] | null
     match(second: ContentFormats): boolean
     match_gtype(second: ContentFormats): GObject.Type
     match_mime_type(second: ContentFormats): string | null
@@ -5385,9 +5387,6 @@ export abstract class DevicePadInterface {
     static name: string
 }
 export abstract class DragSurfaceInterface {
-    static name: string
-}
-export class DrawingContext {
     static name: string
 }
 export class EventSequence {
@@ -5448,12 +5447,14 @@ export class PopupLayout {
     get_anchor_rect(): Rectangle
     get_offset(): [ /* dx */ number, /* dy */ number ]
     get_rect_anchor(): Gravity
+    get_shadow_width(): [ /* left */ number, /* right */ number, /* top */ number, /* bottom */ number ]
     get_surface_anchor(): Gravity
     ref(): PopupLayout
     set_anchor_hints(anchor_hints: AnchorHints): void
     set_anchor_rect(anchor_rect: Rectangle): void
     set_offset(dx: number, dy: number): void
     set_rect_anchor(anchor: Gravity): void
+    set_shadow_width(left: number, right: number, top: number, bottom: number): void
     set_surface_anchor(anchor: Gravity): void
     unref(): void
     static name: string

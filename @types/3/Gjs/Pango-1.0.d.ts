@@ -66,6 +66,10 @@ export enum BidiType {
     S,
     WS,
     ON,
+    LRI,
+    RLI,
+    FSI,
+    PDI,
 }
 export enum CoverageLevel {
     NONE,
@@ -1170,7 +1174,7 @@ export class AttrIterator {
     destroy(): void
     get(type: AttrType): Attribute | null
     get_attrs(): Attribute[]
-    get_font(desc: FontDescription, language?: Language | null, extra_attrs?: Attribute[] | null): void
+    get_font(desc: FontDescription): [ /* language */ Language | null, /* extra_attrs */ Attribute[] | null ]
     next(): boolean
     range(): [ /* start */ number, /* end */ number ]
     static name: string
@@ -1610,6 +1614,6 @@ export class TabArray {
     /* Static methods and pseudo-constructors */
     static new(initial_size: number, positions_in_pixels: boolean): TabArray
 }
-type Glyph = number
-type GlyphUnit = number
-type LayoutRun = GlyphItem
+export type Glyph = number
+export type GlyphUnit = number
+export type LayoutRun = GlyphItem

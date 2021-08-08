@@ -1661,8 +1661,8 @@ export class _Value__data__union {
     v_pointer: object
     static name: string
 }
-type SignalCMarshaller = ClosureMarshal
-type SignalCVaMarshaller = any
+export type SignalCMarshaller = ClosureMarshal
+export type SignalCVaMarshaller = any
 export interface Type {
     name: string
 }

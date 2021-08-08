@@ -4,13 +4,14 @@
 
 import * as Gjs from './Gjs';
 import * as Gsk from './Gsk-4.0';
-import * as Gdk from './Gdk-4.0';
-import * as cairo from './cairo-1.0';
-import * as Pango from './Pango-1.0';
-import * as HarfBuzz from './HarfBuzz-0.0';
+import * as Graphene from './Graphene-1.0';
 import * as GObject from './GObject-2.0';
 import * as GLib from './GLib-2.0';
-import * as Graphene from './Graphene-1.0';
+import * as Gdk from './Gdk-4.0';
+import * as cairo from './cairo-1.0';
+import * as PangoCairo from './PangoCairo-1.0';
+import * as Pango from './Pango-1.0';
+import * as HarfBuzz from './HarfBuzz-0.0';
 import * as Gio from './Gio-2.0';
 import * as GdkPixbuf from './GdkPixbuf-2.0';
 import * as GModule from './GModule-2.0';
@@ -813,6 +814,7 @@ export enum DebugFlags {
     CONSTRAINTS,
     BUILDER_OBJECTS,
     A11Y,
+    ICONFALLBACK,
 }
 export enum DialogFlags {
     MODAL,
@@ -861,6 +863,18 @@ export enum PickFlags {
 }
 export enum PopoverMenuFlags {
     NESTED,
+}
+export enum PrintCapabilities {
+    PAGE_SET,
+    COPIES,
+    COLLATE,
+    REVERSE,
+    SCALE,
+    GENERATE_PDF,
+    GENERATE_PS,
+    PREVIEW,
+    NUMBER_UP,
+    NUMBER_UP_LAYOUT,
 }
 export enum ShortcutActionFlags {
     EXCLUSIVE,
@@ -979,10 +993,11 @@ export function constraint_vfl_parser_error_quark(): GLib.Quark
 export function css_parser_error_quark(): GLib.Quark
 export function css_parser_warning_quark(): GLib.Quark
 export function disable_setlocale(): void
-export function distribute_natural_allocation(extra_space: number, n_requested_sizes: number, sizes: RequestedSize): number
+export function distribute_natural_allocation(extra_space: number, sizes: RequestedSize[]): number
 export function editable_delegate_get_property(object: GObject.Object, prop_id: number, value: any, pspec: GObject.ParamSpec): boolean
 export function editable_delegate_set_property(object: GObject.Object, prop_id: number, value: any, pspec: GObject.ParamSpec): boolean
 export function editable_install_properties(object_class: GObject.ObjectClass, first_prop: number): number
+export function enumerate_printers(func: PrinterFunc, wait: boolean): void
 export function file_chooser_error_quark(): GLib.Quark
 export function get_binary_age(): number
 export function get_debug_flags(): DebugFlags
@@ -994,11 +1009,11 @@ export function get_micro_version(): number
 export function get_minor_version(): number
 export function hsv_to_rgb(h: number, s: number, v: number): [ /* r */ number, /* g */ number, /* b */ number ]
 export function icon_theme_error_quark(): GLib.Quark
-export function im_modules_init(): void
 export function init(): void
 export function init_check(): boolean
 export function is_initialized(): boolean
 export function native_get_for_surface(surface: Gdk.Surface): Native
+export function ordering_from_cmpfunc(cmpfunc_result: number): Ordering
 export function paper_size_get_default(): string
 export function paper_size_get_paper_sizes(include_custom: boolean): PaperSize[]
 export function param_spec_expression(name: string, nick: string, blurb: string, flags: GObject.ParamFlags): GObject.ParamSpec
@@ -1114,8 +1129,14 @@ export interface MenuButtonCreatePopupFunc {
 export interface PageSetupDoneFunc {
     (page_setup: PageSetup): void
 }
+export interface PrintJobCompleteFunc {
+    (print_job: PrintJob, error: GLib.Error): void
+}
 export interface PrintSettingsFunc {
     (key: string, value: string): void
+}
+export interface PrinterFunc {
+    (printer: Printer): boolean
 }
 export interface ScaleFormatValueFunc {
     (scale: Scale, value: number): string
@@ -1289,7 +1310,7 @@ export class Actionable {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -1685,7 +1706,7 @@ export class AppChooser {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -2096,7 +2117,7 @@ export class CellEditable {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -2577,7 +2598,7 @@ export class Editable {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -3084,7 +3105,7 @@ export class Native {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -3503,7 +3524,7 @@ export class Root {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -4151,6 +4172,7 @@ export class AboutDialog {
     focus_visible: boolean
     focus_widget: Widget
     fullscreened: boolean
+    handle_menubar_accel: boolean
     hide_on_close: boolean
     icon_name: string
     readonly is_active: boolean
@@ -4228,7 +4250,7 @@ export class AboutDialog {
     set_license_type(license_type: License): void
     set_logo(logo?: Gdk.Paintable | null): void
     set_logo_icon_name(icon_name?: string | null): void
-    set_program_name(name: string): void
+    set_program_name(name?: string | null): void
     set_system_information(system_information?: string | null): void
     set_translator_credits(translator_credits?: string | null): void
     set_version(version?: string | null): void
@@ -4250,6 +4272,7 @@ export class AboutDialog {
     get_focus(): Widget | null
     get_focus_visible(): boolean
     get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
     get_hide_on_close(): boolean
     get_icon_name(): string | null
     get_mnemonics_visible(): boolean
@@ -4275,6 +4298,7 @@ export class AboutDialog {
     set_display(display: Gdk.Display): void
     set_focus(focus?: Widget | null): void
     set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
     set_hide_on_close(setting: boolean): void
     set_icon_name(name?: string | null): void
     set_mnemonics_visible(setting: boolean): void
@@ -4340,7 +4364,7 @@ export class AboutDialog {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -4651,6 +4675,8 @@ export class AboutDialog {
     connect_after(sigName: "notify::focus-widget", callback: (($obj: AboutDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::fullscreened", callback: (($obj: AboutDialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::fullscreened", callback: (($obj: AboutDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: AboutDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: AboutDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::hide-on-close", callback: (($obj: AboutDialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::hide-on-close", callback: (($obj: AboutDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::icon-name", callback: (($obj: AboutDialog, pspec: GObject.ParamSpec) => void)): number
@@ -4858,7 +4884,7 @@ export class ActionBar {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -5592,7 +5618,7 @@ export class AppChooserButton {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -5935,6 +5961,7 @@ export class AppChooserDialog {
     focus_visible: boolean
     focus_widget: Widget
     fullscreened: boolean
+    handle_menubar_accel: boolean
     hide_on_close: boolean
     icon_name: string
     readonly is_active: boolean
@@ -6014,6 +6041,7 @@ export class AppChooserDialog {
     get_focus(): Widget | null
     get_focus_visible(): boolean
     get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
     get_hide_on_close(): boolean
     get_icon_name(): string | null
     get_mnemonics_visible(): boolean
@@ -6039,6 +6067,7 @@ export class AppChooserDialog {
     set_display(display: Gdk.Display): void
     set_focus(focus?: Widget | null): void
     set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
     set_hide_on_close(setting: boolean): void
     set_icon_name(name?: string | null): void
     set_mnemonics_visible(setting: boolean): void
@@ -6104,7 +6133,7 @@ export class AppChooserDialog {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -6395,6 +6424,8 @@ export class AppChooserDialog {
     connect_after(sigName: "notify::focus-widget", callback: (($obj: AppChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::fullscreened", callback: (($obj: AppChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::fullscreened", callback: (($obj: AppChooserDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: AppChooserDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: AppChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::hide-on-close", callback: (($obj: AppChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::hide-on-close", callback: (($obj: AppChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::icon-name", callback: (($obj: AppChooserDialog, pspec: GObject.ParamSpec) => void)): number
@@ -6620,7 +6651,7 @@ export class AppChooserWidget {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -7208,6 +7239,7 @@ export class ApplicationWindow {
     focus_visible: boolean
     focus_widget: Widget
     fullscreened: boolean
+    handle_menubar_accel: boolean
     hide_on_close: boolean
     icon_name: string
     readonly is_active: boolean
@@ -7279,6 +7311,7 @@ export class ApplicationWindow {
     get_focus(): Widget | null
     get_focus_visible(): boolean
     get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
     get_hide_on_close(): boolean
     get_icon_name(): string | null
     get_mnemonics_visible(): boolean
@@ -7304,6 +7337,7 @@ export class ApplicationWindow {
     set_display(display: Gdk.Display): void
     set_focus(focus?: Widget | null): void
     set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
     set_hide_on_close(setting: boolean): void
     set_icon_name(name?: string | null): void
     set_mnemonics_visible(setting: boolean): void
@@ -7369,7 +7403,7 @@ export class ApplicationWindow {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -7696,6 +7730,8 @@ export class ApplicationWindow {
     connect_after(sigName: "notify::focus-widget", callback: (($obj: ApplicationWindow, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::fullscreened", callback: (($obj: ApplicationWindow, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::fullscreened", callback: (($obj: ApplicationWindow, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: ApplicationWindow, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: ApplicationWindow, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::hide-on-close", callback: (($obj: ApplicationWindow, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::hide-on-close", callback: (($obj: ApplicationWindow, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::icon-name", callback: (($obj: ApplicationWindow, pspec: GObject.ParamSpec) => void)): number
@@ -7915,7 +7951,7 @@ export class AspectFrame {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -8247,6 +8283,7 @@ export class Assistant {
     focus_visible: boolean
     focus_widget: Widget
     fullscreened: boolean
+    handle_menubar_accel: boolean
     hide_on_close: boolean
     icon_name: string
     readonly is_active: boolean
@@ -8336,6 +8373,7 @@ export class Assistant {
     get_focus(): Widget | null
     get_focus_visible(): boolean
     get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
     get_hide_on_close(): boolean
     get_icon_name(): string | null
     get_mnemonics_visible(): boolean
@@ -8361,6 +8399,7 @@ export class Assistant {
     set_display(display: Gdk.Display): void
     set_focus(focus?: Widget | null): void
     set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
     set_hide_on_close(setting: boolean): void
     set_icon_name(name?: string | null): void
     set_mnemonics_visible(setting: boolean): void
@@ -8426,7 +8465,7 @@ export class Assistant {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -8719,6 +8758,8 @@ export class Assistant {
     connect_after(sigName: "notify::focus-widget", callback: (($obj: Assistant, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::fullscreened", callback: (($obj: Assistant, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::fullscreened", callback: (($obj: Assistant, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: Assistant, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: Assistant, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::hide-on-close", callback: (($obj: Assistant, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::hide-on-close", callback: (($obj: Assistant, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::icon-name", callback: (($obj: Assistant, pspec: GObject.ParamSpec) => void)): number
@@ -9044,9 +9085,9 @@ export class BoolFilter {
     /* Fields of GObject.Object */
     g_type_instance: GObject.TypeInstance
     /* Methods of Gtk.BoolFilter */
-    get_expression(): Expression
+    get_expression(): Expression | null
     get_invert(): boolean
-    set_expression(expression: Expression): void
+    set_expression(expression?: Expression | null): void
     set_invert(invert: boolean): void
     /* Methods of Gtk.Filter */
     changed(change: FilterChange): void
@@ -9227,7 +9268,7 @@ export class Box {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -9961,7 +10002,7 @@ export class Button {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -10438,7 +10479,7 @@ export class Calendar {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -13479,7 +13520,7 @@ export class CellView {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -13928,7 +13969,7 @@ export class CenterBox {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -14437,7 +14478,7 @@ export class CheckButton {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -14580,6 +14621,7 @@ export class CheckButton {
     /* Methods of Gtk.Buildable */
     get_buildable_id(): string
     /* Virtual methods of Gtk.CheckButton */
+    vfunc_activate(): void
     vfunc_toggled(): void
     vfunc_get_action_name(): string | null
     vfunc_get_action_target_value(): GLib.Variant | null
@@ -14629,6 +14671,9 @@ export class CheckButton {
     vfunc_notify(pspec: GObject.ParamSpec): void
     vfunc_set_property(property_id: number, value: GObject.Value, pspec: GObject.ParamSpec): void
     /* Signals of Gtk.CheckButton */
+    connect(sigName: "activate", callback: (($obj: CheckButton) => void)): number
+    connect_after(sigName: "activate", callback: (($obj: CheckButton) => void)): number
+    emit(sigName: "activate"): void
     connect(sigName: "toggled", callback: (($obj: CheckButton) => void)): number
     connect_after(sigName: "toggled", callback: (($obj: CheckButton) => void)): number
     emit(sigName: "toggled"): void
@@ -14900,7 +14945,7 @@ export class ColorButton {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -15254,6 +15299,7 @@ export class ColorChooserDialog {
     focus_visible: boolean
     focus_widget: Widget
     fullscreened: boolean
+    handle_menubar_accel: boolean
     hide_on_close: boolean
     icon_name: string
     readonly is_active: boolean
@@ -15332,6 +15378,7 @@ export class ColorChooserDialog {
     get_focus(): Widget | null
     get_focus_visible(): boolean
     get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
     get_hide_on_close(): boolean
     get_icon_name(): string | null
     get_mnemonics_visible(): boolean
@@ -15357,6 +15404,7 @@ export class ColorChooserDialog {
     set_display(display: Gdk.Display): void
     set_focus(focus?: Widget | null): void
     set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
     set_hide_on_close(setting: boolean): void
     set_icon_name(name?: string | null): void
     set_mnemonics_visible(setting: boolean): void
@@ -15422,7 +15470,7 @@ export class ColorChooserDialog {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -15724,6 +15772,8 @@ export class ColorChooserDialog {
     connect_after(sigName: "notify::focus-widget", callback: (($obj: ColorChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::fullscreened", callback: (($obj: ColorChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::fullscreened", callback: (($obj: ColorChooserDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: ColorChooserDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: ColorChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::hide-on-close", callback: (($obj: ColorChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::hide-on-close", callback: (($obj: ColorChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::icon-name", callback: (($obj: ColorChooserDialog, pspec: GObject.ParamSpec) => void)): number
@@ -15933,7 +15983,7 @@ export class ColorChooserWidget {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -16396,7 +16446,7 @@ export class ColumnView {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -16987,7 +17037,7 @@ export class ComboBox {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -17511,7 +17561,7 @@ export class ComboBoxText {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -18489,6 +18539,7 @@ export class Dialog {
     focus_visible: boolean
     focus_widget: Widget
     fullscreened: boolean
+    handle_menubar_accel: boolean
     hide_on_close: boolean
     icon_name: string
     readonly is_active: boolean
@@ -18564,6 +18615,7 @@ export class Dialog {
     get_focus(): Widget | null
     get_focus_visible(): boolean
     get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
     get_hide_on_close(): boolean
     get_icon_name(): string | null
     get_mnemonics_visible(): boolean
@@ -18589,6 +18641,7 @@ export class Dialog {
     set_display(display: Gdk.Display): void
     set_focus(focus?: Widget | null): void
     set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
     set_hide_on_close(setting: boolean): void
     set_icon_name(name?: string | null): void
     set_mnemonics_visible(setting: boolean): void
@@ -18654,7 +18707,7 @@ export class Dialog {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -18939,6 +18992,8 @@ export class Dialog {
     connect_after(sigName: "notify::focus-widget", callback: (($obj: Dialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::fullscreened", callback: (($obj: Dialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::fullscreened", callback: (($obj: Dialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: Dialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: Dialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::hide-on-close", callback: (($obj: Dialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::hide-on-close", callback: (($obj: Dialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::icon-name", callback: (($obj: Dialog, pspec: GObject.ParamSpec) => void)): number
@@ -19238,7 +19293,7 @@ export class DragIcon {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -19821,7 +19876,7 @@ export class DrawingArea {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -20356,7 +20411,7 @@ export class DropDown {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -21019,7 +21074,7 @@ export class EditableLabel {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -21513,7 +21568,7 @@ export class EmojiChooser {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -22100,7 +22155,7 @@ export class Entry {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -23558,7 +23613,7 @@ export class Expander {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -23911,6 +23966,7 @@ export class FileChooserDialog {
     focus_visible: boolean
     focus_widget: Widget
     fullscreened: boolean
+    handle_menubar_accel: boolean
     hide_on_close: boolean
     icon_name: string
     readonly is_active: boolean
@@ -23993,6 +24049,7 @@ export class FileChooserDialog {
     get_focus(): Widget | null
     get_focus_visible(): boolean
     get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
     get_hide_on_close(): boolean
     get_icon_name(): string | null
     get_mnemonics_visible(): boolean
@@ -24018,6 +24075,7 @@ export class FileChooserDialog {
     set_display(display: Gdk.Display): void
     set_focus(focus?: Widget | null): void
     set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
     set_hide_on_close(setting: boolean): void
     set_icon_name(name?: string | null): void
     set_mnemonics_visible(setting: boolean): void
@@ -24083,7 +24141,7 @@ export class FileChooserDialog {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -24394,6 +24452,8 @@ export class FileChooserDialog {
     connect_after(sigName: "notify::focus-widget", callback: (($obj: FileChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::fullscreened", callback: (($obj: FileChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::fullscreened", callback: (($obj: FileChooserDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: FileChooserDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: FileChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::hide-on-close", callback: (($obj: FileChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::hide-on-close", callback: (($obj: FileChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::icon-name", callback: (($obj: FileChooserDialog, pspec: GObject.ParamSpec) => void)): number
@@ -24762,7 +24822,7 @@ export class FileChooserWidget {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -25484,7 +25544,7 @@ export class Fixed {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -26134,7 +26194,7 @@ export class FlowBox {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -26522,8 +26582,8 @@ export class FlowBoxChild {
     width_request: number
     /* Properties of Gtk.Accessible */
     accessible_role: AccessibleRole
-    /* Fields of Gtk.FlowBoxChild */
-    parent_instance: Widget
+    /* Fields of Gtk.Widget */
+    parent_instance: GObject.InitiallyUnowned
     /* Fields of GObject.InitiallyUnowned */
     g_type_instance: GObject.TypeInstance
     /* Methods of Gtk.FlowBoxChild */
@@ -26585,7 +26645,7 @@ export class FlowBoxChild {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -27024,7 +27084,7 @@ export class FontButton {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -27406,6 +27466,7 @@ export class FontChooserDialog {
     focus_visible: boolean
     focus_widget: Widget
     fullscreened: boolean
+    handle_menubar_accel: boolean
     hide_on_close: boolean
     icon_name: string
     readonly is_active: boolean
@@ -27489,6 +27550,7 @@ export class FontChooserDialog {
     get_focus(): Widget | null
     get_focus_visible(): boolean
     get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
     get_hide_on_close(): boolean
     get_icon_name(): string | null
     get_mnemonics_visible(): boolean
@@ -27514,6 +27576,7 @@ export class FontChooserDialog {
     set_display(display: Gdk.Display): void
     set_focus(focus?: Widget | null): void
     set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
     set_hide_on_close(setting: boolean): void
     set_icon_name(name?: string | null): void
     set_mnemonics_visible(setting: boolean): void
@@ -27579,7 +27642,7 @@ export class FontChooserDialog {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -27894,6 +27957,8 @@ export class FontChooserDialog {
     connect_after(sigName: "notify::focus-widget", callback: (($obj: FontChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::fullscreened", callback: (($obj: FontChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::fullscreened", callback: (($obj: FontChooserDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: FontChooserDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: FontChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::hide-on-close", callback: (($obj: FontChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::hide-on-close", callback: (($obj: FontChooserDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::icon-name", callback: (($obj: FontChooserDialog, pspec: GObject.ParamSpec) => void)): number
@@ -28121,7 +28186,7 @@ export class FontChooserWidget {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -28584,7 +28649,7 @@ export class Frame {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -29020,7 +29085,7 @@ export class GLArea {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -30815,7 +30880,7 @@ export class Grid {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -31446,7 +31511,7 @@ export class GridView {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -31903,7 +31968,7 @@ export class HeaderBar {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -32231,10 +32296,12 @@ export class IMContext {
     focus_out(): void
     get_preedit_string(): [ /* str */ string, /* attrs */ Pango.AttrList, /* cursor_pos */ number ]
     get_surrounding(): [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number ]
+    get_surrounding_with_selection(): [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number, /* anchor_index */ number ]
     reset(): void
     set_client_widget(widget?: Widget | null): void
     set_cursor_location(area: Gdk.Rectangle): void
     set_surrounding(text: string, len: number, cursor_index: number): void
+    set_surrounding_with_selection(text: string, len: number, cursor_index: number, anchor_index: number): void
     set_use_preedit(use_preedit: boolean): void
     /* Methods of GObject.Object */
     bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
@@ -32266,6 +32333,7 @@ export class IMContext {
     vfunc_focus_out(): void
     vfunc_get_preedit_string(): [ /* str */ string, /* attrs */ Pango.AttrList, /* cursor_pos */ number ]
     vfunc_get_surrounding(): [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number ]
+    vfunc_get_surrounding_with_selection(): [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number, /* anchor_index */ number ]
     vfunc_preedit_changed(): void
     vfunc_preedit_end(): void
     vfunc_preedit_start(): void
@@ -32274,6 +32342,7 @@ export class IMContext {
     vfunc_set_client_widget(widget?: Widget | null): void
     vfunc_set_cursor_location(area: Gdk.Rectangle): void
     vfunc_set_surrounding(text: string, len: number, cursor_index: number): void
+    vfunc_set_surrounding_with_selection(text: string, len: number, cursor_index: number, anchor_index: number): void
     vfunc_set_use_preedit(use_preedit: boolean): void
     /* Virtual methods of GObject.Object */
     vfunc_constructed(): void
@@ -32341,10 +32410,12 @@ export class IMContextSimple {
     focus_out(): void
     get_preedit_string(): [ /* str */ string, /* attrs */ Pango.AttrList, /* cursor_pos */ number ]
     get_surrounding(): [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number ]
+    get_surrounding_with_selection(): [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number, /* anchor_index */ number ]
     reset(): void
     set_client_widget(widget?: Widget | null): void
     set_cursor_location(area: Gdk.Rectangle): void
     set_surrounding(text: string, len: number, cursor_index: number): void
+    set_surrounding_with_selection(text: string, len: number, cursor_index: number, anchor_index: number): void
     set_use_preedit(use_preedit: boolean): void
     /* Methods of GObject.Object */
     bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
@@ -32376,6 +32447,7 @@ export class IMContextSimple {
     vfunc_focus_out(): void
     vfunc_get_preedit_string(): [ /* str */ string, /* attrs */ Pango.AttrList, /* cursor_pos */ number ]
     vfunc_get_surrounding(): [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number ]
+    vfunc_get_surrounding_with_selection(): [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number, /* anchor_index */ number ]
     vfunc_preedit_changed(): void
     vfunc_preedit_end(): void
     vfunc_preedit_start(): void
@@ -32384,6 +32456,7 @@ export class IMContextSimple {
     vfunc_set_client_widget(widget?: Widget | null): void
     vfunc_set_cursor_location(area: Gdk.Rectangle): void
     vfunc_set_surrounding(text: string, len: number, cursor_index: number): void
+    vfunc_set_surrounding_with_selection(text: string, len: number, cursor_index: number, anchor_index: number): void
     vfunc_set_use_preedit(use_preedit: boolean): void
     /* Virtual methods of GObject.Object */
     vfunc_constructed(): void
@@ -32454,10 +32527,12 @@ export class IMMulticontext {
     focus_out(): void
     get_preedit_string(): [ /* str */ string, /* attrs */ Pango.AttrList, /* cursor_pos */ number ]
     get_surrounding(): [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number ]
+    get_surrounding_with_selection(): [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number, /* anchor_index */ number ]
     reset(): void
     set_client_widget(widget?: Widget | null): void
     set_cursor_location(area: Gdk.Rectangle): void
     set_surrounding(text: string, len: number, cursor_index: number): void
+    set_surrounding_with_selection(text: string, len: number, cursor_index: number, anchor_index: number): void
     set_use_preedit(use_preedit: boolean): void
     /* Methods of GObject.Object */
     bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
@@ -32489,6 +32564,7 @@ export class IMMulticontext {
     vfunc_focus_out(): void
     vfunc_get_preedit_string(): [ /* str */ string, /* attrs */ Pango.AttrList, /* cursor_pos */ number ]
     vfunc_get_surrounding(): [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number ]
+    vfunc_get_surrounding_with_selection(): [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number, /* anchor_index */ number ]
     vfunc_preedit_changed(): void
     vfunc_preedit_end(): void
     vfunc_preedit_start(): void
@@ -32497,6 +32573,7 @@ export class IMMulticontext {
     vfunc_set_client_widget(widget?: Widget | null): void
     vfunc_set_cursor_location(area: Gdk.Rectangle): void
     vfunc_set_surrounding(text: string, len: number, cursor_index: number): void
+    vfunc_set_surrounding_with_selection(text: string, len: number, cursor_index: number, anchor_index: number): void
     vfunc_set_use_preedit(use_preedit: boolean): void
     /* Virtual methods of GObject.Object */
     vfunc_constructed(): void
@@ -32650,6 +32727,7 @@ export class IconTheme {
     get_resource_path(): string[] | null
     get_search_path(): string[] | null
     get_theme_name(): string
+    has_gicon(gicon: Gio.Icon): boolean
     has_icon(icon_name: string): boolean
     lookup_by_gicon(icon: Gio.Icon, size: number, scale: number, direction: TextDirection, flags: IconLookupFlags): IconPaintable
     lookup_icon(icon_name: string, fallbacks: string[] | null, size: number, scale: number, direction: TextDirection, flags: IconLookupFlags): IconPaintable
@@ -32916,7 +32994,7 @@ export class IconView {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -33446,7 +33524,7 @@ export class Image {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -33891,7 +33969,7 @@ export class InfoBar {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -34449,7 +34527,7 @@ export class Label {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -35045,7 +35123,7 @@ export class LevelBar {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -35496,7 +35574,7 @@ export class LinkButton {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -35952,7 +36030,7 @@ export class ListBase {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -36339,7 +36417,7 @@ export class ListBox {
     get_adjustment(): Adjustment
     get_row_at_index(index_: number): ListBoxRow | null
     get_row_at_y(y: number): ListBoxRow | null
-    get_selected_row(): ListBoxRow
+    get_selected_row(): ListBoxRow | null
     get_selected_rows(): ListBoxRow[]
     get_selection_mode(): SelectionMode
     get_show_separators(): boolean
@@ -36415,7 +36493,7 @@ export class ListBox {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -36871,7 +36949,7 @@ export class ListBoxRow {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -37340,7 +37418,7 @@ export class ListStore {
     insert(position: number): /* iter */ TreeIter
     insert_after(sibling?: TreeIter | null): /* iter */ TreeIter
     insert_before(sibling?: TreeIter | null): /* iter */ TreeIter
-    insert_with_valuesv(position: number, columns: number[], values: any): /* iter */ TreeIter | null
+    insert_with_values(position: number, columns: number[], values: any): /* iter */ TreeIter | null
     iter_is_valid(iter: TreeIter): boolean
     move_after(iter: TreeIter, position?: TreeIter | null): void
     move_before(iter: TreeIter, position?: TreeIter | null): void
@@ -37629,7 +37707,7 @@ export class ListView {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -38105,7 +38183,7 @@ export class LockButton {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -38629,7 +38707,7 @@ export class MediaControls {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -39387,7 +39465,7 @@ export class MenuButton {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -39732,6 +39810,7 @@ export class MessageDialog {
     focus_visible: boolean
     focus_widget: Widget
     fullscreened: boolean
+    handle_menubar_accel: boolean
     hide_on_close: boolean
     icon_name: string
     readonly is_active: boolean
@@ -39810,6 +39889,7 @@ export class MessageDialog {
     get_focus(): Widget | null
     get_focus_visible(): boolean
     get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
     get_hide_on_close(): boolean
     get_icon_name(): string | null
     get_mnemonics_visible(): boolean
@@ -39835,6 +39915,7 @@ export class MessageDialog {
     set_display(display: Gdk.Display): void
     set_focus(focus?: Widget | null): void
     set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
     set_hide_on_close(setting: boolean): void
     set_icon_name(name?: string | null): void
     set_mnemonics_visible(setting: boolean): void
@@ -39900,7 +39981,7 @@ export class MessageDialog {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -40197,6 +40278,8 @@ export class MessageDialog {
     connect_after(sigName: "notify::focus-widget", callback: (($obj: MessageDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::fullscreened", callback: (($obj: MessageDialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::fullscreened", callback: (($obj: MessageDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: MessageDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: MessageDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::hide-on-close", callback: (($obj: MessageDialog, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::hide-on-close", callback: (($obj: MessageDialog, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::icon-name", callback: (($obj: MessageDialog, pspec: GObject.ParamSpec) => void)): number
@@ -41285,7 +41368,7 @@ export class Notebook {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -41973,7 +42056,7 @@ export class Overlay {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -42572,6 +42655,583 @@ export class PageSetup {
     static new_from_key_file(key_file: GLib.KeyFile, group_name?: string | null): PageSetup
     static $gtype: GObject.Type
 }
+export interface PageSetupUnixDialog_ConstructProps extends Dialog_ConstructProps {
+    accessible_role?: AccessibleRole
+}
+export class PageSetupUnixDialog {
+    /* Properties of Gtk.Window */
+    application: Application
+    child: Widget
+    decorated: boolean
+    default_height: number
+    default_widget: Widget
+    default_width: number
+    deletable: boolean
+    destroy_with_parent: boolean
+    display: Gdk.Display
+    focus_visible: boolean
+    focus_widget: Widget
+    fullscreened: boolean
+    handle_menubar_accel: boolean
+    hide_on_close: boolean
+    icon_name: string
+    readonly is_active: boolean
+    maximized: boolean
+    mnemonics_visible: boolean
+    modal: boolean
+    resizable: boolean
+    startup_id: string
+    title: string
+    transient_for: Window
+    /* Properties of Gtk.Widget */
+    can_focus: boolean
+    can_target: boolean
+    css_classes: string[]
+    cursor: Gdk.Cursor
+    focus_on_click: boolean
+    focusable: boolean
+    halign: Align
+    readonly has_default: boolean
+    readonly has_focus: boolean
+    has_tooltip: boolean
+    height_request: number
+    hexpand: boolean
+    hexpand_set: boolean
+    layout_manager: LayoutManager
+    margin_bottom: number
+    margin_end: number
+    margin_start: number
+    margin_top: number
+    name: string
+    opacity: number
+    overflow: Overflow
+    readonly parent: Widget
+    receives_default: boolean
+    readonly root: Root
+    readonly scale_factor: number
+    sensitive: boolean
+    tooltip_markup: string
+    tooltip_text: string
+    valign: Align
+    vexpand: boolean
+    vexpand_set: boolean
+    visible: boolean
+    width_request: number
+    /* Properties of Gtk.Accessible */
+    accessible_role: AccessibleRole
+    /* Fields of Gtk.Dialog */
+    parent_instance: Window
+    /* Fields of GObject.InitiallyUnowned */
+    g_type_instance: GObject.TypeInstance
+    /* Methods of Gtk.PageSetupUnixDialog */
+    get_page_setup(): PageSetup
+    get_print_settings(): PrintSettings
+    set_page_setup(page_setup: PageSetup): void
+    set_print_settings(print_settings: PrintSettings): void
+    /* Methods of Gtk.Dialog */
+    add_action_widget(child: Widget, response_id: number): void
+    add_button(button_text: string, response_id: number): Widget
+    get_content_area(): Box
+    get_header_bar(): HeaderBar
+    get_response_for_widget(widget: Widget): number
+    get_widget_for_response(response_id: number): Widget | null
+    response(response_id: number): void
+    set_default_response(response_id: number): void
+    set_response_sensitive(response_id: number, setting: boolean): void
+    /* Methods of Gtk.Window */
+    close(): void
+    destroy(): void
+    fullscreen(): void
+    fullscreen_on_monitor(monitor: Gdk.Monitor): void
+    get_application(): Application | null
+    get_child(): Widget | null
+    get_decorated(): boolean
+    get_default_size(): [ /* width */ number | null, /* height */ number | null ]
+    get_default_widget(): Widget | null
+    get_deletable(): boolean
+    get_destroy_with_parent(): boolean
+    get_focus(): Widget | null
+    get_focus_visible(): boolean
+    get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
+    get_hide_on_close(): boolean
+    get_icon_name(): string | null
+    get_mnemonics_visible(): boolean
+    get_modal(): boolean
+    get_resizable(): boolean
+    get_title(): string | null
+    get_titlebar(): Widget | null
+    get_transient_for(): Window | null
+    has_group(): boolean
+    is_fullscreen(): boolean
+    is_maximized(): boolean
+    maximize(): void
+    minimize(): void
+    present(): void
+    present_with_time(timestamp: number): void
+    set_application(application?: Application | null): void
+    set_child(child?: Widget | null): void
+    set_decorated(setting: boolean): void
+    set_default_size(width: number, height: number): void
+    set_default_widget(default_widget?: Widget | null): void
+    set_deletable(setting: boolean): void
+    set_destroy_with_parent(setting: boolean): void
+    set_display(display: Gdk.Display): void
+    set_focus(focus?: Widget | null): void
+    set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
+    set_hide_on_close(setting: boolean): void
+    set_icon_name(name?: string | null): void
+    set_mnemonics_visible(setting: boolean): void
+    set_modal(modal: boolean): void
+    set_resizable(resizable: boolean): void
+    set_startup_id(startup_id: string): void
+    set_title(title?: string | null): void
+    set_titlebar(titlebar?: Widget | null): void
+    set_transient_for(parent?: Window | null): void
+    unfullscreen(): void
+    unmaximize(): void
+    unminimize(): void
+    /* Methods of Gtk.Widget */
+    action_set_enabled(action_name: string, enabled: boolean): void
+    activate(): boolean
+    activate_action(name: string, args?: GLib.Variant | null): boolean
+    activate_default(): void
+    add_controller(controller: EventController): void
+    add_css_class(css_class: string): void
+    add_mnemonic_label(label: Widget): void
+    add_tick_callback(callback: TickCallback): number
+    allocate(width: number, height: number, baseline: number, transform?: Gsk.Transform | null): void
+    child_focus(direction: DirectionType): boolean
+    compute_bounds(target: Widget): [ /* returnType */ boolean, /* out_bounds */ Graphene.Rect ]
+    compute_expand(orientation: Orientation): boolean
+    compute_point(target: Widget, point: Graphene.Point): [ /* returnType */ boolean, /* out_point */ Graphene.Point ]
+    compute_transform(target: Widget): [ /* returnType */ boolean, /* out_transform */ Graphene.Matrix ]
+    contains(x: number, y: number): boolean
+    create_pango_context(): Pango.Context
+    create_pango_layout(text?: string | null): Pango.Layout
+    drag_check_threshold(start_x: number, start_y: number, current_x: number, current_y: number): boolean
+    error_bell(): void
+    get_allocated_baseline(): number
+    get_allocated_height(): number
+    get_allocated_width(): number
+    get_allocation(): /* allocation */ Allocation
+    get_ancestor(widget_type: GObject.Type): Widget | null
+    get_can_focus(): boolean
+    get_can_target(): boolean
+    get_child_visible(): boolean
+    get_clipboard(): Gdk.Clipboard
+    get_css_classes(): string[]
+    get_css_name(): string
+    get_cursor(): Gdk.Cursor | null
+    get_direction(): TextDirection
+    get_display(): Gdk.Display
+    get_first_child(): Widget | null
+    get_focus_child(): Widget | null
+    get_focus_on_click(): boolean
+    get_focusable(): boolean
+    get_font_map(): Pango.FontMap | null
+    get_font_options(): cairo.FontOptions | null
+    get_frame_clock(): Gdk.FrameClock | null
+    get_halign(): Align
+    get_has_tooltip(): boolean
+    get_height(): number
+    get_hexpand(): boolean
+    get_hexpand_set(): boolean
+    get_last_child(): Widget | null
+    get_layout_manager(): LayoutManager | null
+    get_mapped(): boolean
+    get_margin_bottom(): number
+    get_margin_end(): number
+    get_margin_start(): number
+    get_margin_top(): number
+    get_name(): string
+    get_native(): Native | null
+    get_next_sibling(): Widget | null
+    get_opacity(): number
+    get_overflow(): Overflow
+    get_pango_context(): Pango.Context
+    get_parent(): Widget | null
+    get_preferred_size(): [ /* minimum_size */ Requisition | null, /* natural_size */ Requisition | null ]
+    get_prev_sibling(): Widget | null
+    get_primary_clipboard(): Gdk.Clipboard
+    get_realized(): boolean
+    get_receives_default(): boolean
+    get_request_mode(): SizeRequestMode
+    get_root(): Root | null
+    get_scale_factor(): number
+    get_sensitive(): boolean
+    get_settings(): Settings
+    get_size(orientation: Orientation): number
+    get_size_request(): [ /* width */ number | null, /* height */ number | null ]
+    get_state_flags(): StateFlags
+    get_style_context(): StyleContext
+    get_template_child(widget_type: GObject.Type, name: string): GObject.Object
+    get_tooltip_markup(): string | null
+    get_tooltip_text(): string | null
+    get_valign(): Align
+    get_vexpand(): boolean
+    get_vexpand_set(): boolean
+    get_visible(): boolean
+    get_width(): number
+    grab_focus(): boolean
+    has_css_class(css_class: string): boolean
+    has_visible_focus(): boolean
+    hide(): void
+    in_destruction(): boolean
+    init_template(): void
+    insert_action_group(name: string, group?: Gio.ActionGroup | null): void
+    insert_after(parent: Widget, previous_sibling?: Widget | null): void
+    insert_before(parent: Widget, next_sibling?: Widget | null): void
+    is_ancestor(ancestor: Widget): boolean
+    is_drawable(): boolean
+    is_focus(): boolean
+    is_sensitive(): boolean
+    is_visible(): boolean
+    keynav_failed(direction: DirectionType): boolean
+    list_mnemonic_labels(): Widget[]
+    map(): void
+    measure(orientation: Orientation, for_size: number): [ /* minimum */ number | null, /* natural */ number | null, /* minimum_baseline */ number | null, /* natural_baseline */ number | null ]
+    mnemonic_activate(group_cycling: boolean): boolean
+    observe_children(): Gio.ListModel
+    observe_controllers(): Gio.ListModel
+    pick(x: number, y: number, flags: PickFlags): Widget | null
+    queue_allocate(): void
+    queue_draw(): void
+    queue_resize(): void
+    realize(): void
+    remove_controller(controller: EventController): void
+    remove_css_class(css_class: string): void
+    remove_mnemonic_label(label: Widget): void
+    remove_tick_callback(id: number): void
+    set_can_focus(can_focus: boolean): void
+    set_can_target(can_target: boolean): void
+    set_child_visible(child_visible: boolean): void
+    set_css_classes(classes: string[]): void
+    set_cursor(cursor?: Gdk.Cursor | null): void
+    set_cursor_from_name(name?: string | null): void
+    set_direction(dir: TextDirection): void
+    set_focus_child(child?: Widget | null): void
+    set_focus_on_click(focus_on_click: boolean): void
+    set_focusable(focusable: boolean): void
+    set_font_map(font_map?: Pango.FontMap | null): void
+    set_font_options(options?: cairo.FontOptions | null): void
+    set_halign(align: Align): void
+    set_has_tooltip(has_tooltip: boolean): void
+    set_hexpand(expand: boolean): void
+    set_hexpand_set(set: boolean): void
+    set_layout_manager(layout_manager?: LayoutManager | null): void
+    set_margin_bottom(margin: number): void
+    set_margin_end(margin: number): void
+    set_margin_start(margin: number): void
+    set_margin_top(margin: number): void
+    set_name(name: string): void
+    set_opacity(opacity: number): void
+    set_overflow(overflow: Overflow): void
+    set_parent(parent: Widget): void
+    set_receives_default(receives_default: boolean): void
+    set_sensitive(sensitive: boolean): void
+    set_size_request(width: number, height: number): void
+    set_state_flags(flags: StateFlags, clear: boolean): void
+    set_tooltip_markup(markup?: string | null): void
+    set_tooltip_text(text?: string | null): void
+    set_valign(align: Align): void
+    set_vexpand(expand: boolean): void
+    set_vexpand_set(set: boolean): void
+    set_visible(visible: boolean): void
+    should_layout(): boolean
+    show(): void
+    size_allocate(allocation: Allocation, baseline: number): void
+    snapshot_child(child: Widget, snapshot: Snapshot): void
+    translate_coordinates(dest_widget: Widget, src_x: number, src_y: number): [ /* returnType */ boolean, /* dest_x */ number | null, /* dest_y */ number | null ]
+    trigger_tooltip_query(): void
+    unmap(): void
+    unparent(): void
+    unrealize(): void
+    unset_state_flags(flags: StateFlags): void
+    /* Methods of GObject.Object */
+    bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
+    bind_property_full(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags, transform_to: GObject.Closure, transform_from: GObject.Closure): GObject.Binding
+    force_floating(): void
+    freeze_notify(): void
+    get_data(key: string): object | null
+    get_property(property_name: string, value: GObject.Value): void
+    get_qdata(quark: GLib.Quark): object | null
+    getv(names: string[], values: GObject.Value[]): void
+    is_floating(): boolean
+    notify(property_name: string): void
+    notify_by_pspec(pspec: GObject.ParamSpec): void
+    ref(): GObject.Object
+    ref_sink(): GObject.Object
+    run_dispose(): void
+    set_data(key: string, data?: object | null): void
+    set_property(property_name: string, value: GObject.Value): void
+    steal_data(key: string): object | null
+    steal_qdata(quark: GLib.Quark): object | null
+    thaw_notify(): void
+    unref(): void
+    watch_closure(closure: GObject.Closure): void
+    /* Methods of Gtk.Accessible */
+    get_accessible_role(): AccessibleRole
+    reset_property(property: AccessibleProperty): void
+    reset_relation(relation: AccessibleRelation): void
+    reset_state(state: AccessibleState): void
+    update_property(properties: AccessibleProperty[], values: any): void
+    update_relation(relations: AccessibleRelation[], values: any): void
+    update_state(states: AccessibleState[], values: any): void
+    /* Methods of Gtk.Buildable */
+    get_buildable_id(): string
+    /* Methods of Gtk.Native */
+    get_renderer(): Gsk.Renderer
+    get_surface(): Gdk.Surface
+    get_surface_transform(): [ /* x */ number, /* y */ number ]
+    /* Virtual methods of Gtk.Dialog */
+    vfunc_close(): void
+    vfunc_response(response_id: number): void
+    /* Virtual methods of Gtk.Window */
+    vfunc_activate_default(): void
+    vfunc_activate_focus(): void
+    vfunc_close_request(): boolean
+    vfunc_enable_debugging(toggle: boolean): boolean
+    vfunc_keys_changed(): void
+    vfunc_add_controller(controller: ShortcutController): void
+    vfunc_remove_controller(controller: ShortcutController): void
+    /* Virtual methods of Gtk.Widget */
+    vfunc_compute_expand(hexpand_p: boolean, vexpand_p: boolean): void
+    vfunc_contains(x: number, y: number): boolean
+    vfunc_css_changed(change: CssStyleChange): void
+    vfunc_direction_changed(previous_direction: TextDirection): void
+    vfunc_focus(direction: DirectionType): boolean
+    vfunc_get_request_mode(): SizeRequestMode
+    vfunc_grab_focus(): boolean
+    vfunc_hide(): void
+    vfunc_keynav_failed(direction: DirectionType): boolean
+    vfunc_map(): void
+    vfunc_measure(orientation: Orientation, for_size: number): [ /* minimum */ number | null, /* natural */ number | null, /* minimum_baseline */ number | null, /* natural_baseline */ number | null ]
+    vfunc_mnemonic_activate(group_cycling: boolean): boolean
+    vfunc_move_focus(direction: DirectionType): void
+    vfunc_query_tooltip(x: number, y: number, keyboard_tooltip: boolean, tooltip: Tooltip): boolean
+    vfunc_realize(): void
+    vfunc_root(): void
+    vfunc_set_focus_child(child?: Widget | null): void
+    vfunc_show(): void
+    vfunc_size_allocate(width: number, height: number, baseline: number): void
+    vfunc_snapshot(snapshot: Snapshot): void
+    vfunc_state_flags_changed(previous_state_flags: StateFlags): void
+    vfunc_system_setting_changed(settings: SystemSetting): void
+    vfunc_unmap(): void
+    vfunc_unrealize(): void
+    vfunc_unroot(): void
+    vfunc_add_child(builder: Builder, child: GObject.Object, type?: string | null): void
+    vfunc_custom_finished(builder: Builder, child: GObject.Object | null, tagname: string, data?: object | null): void
+    vfunc_custom_tag_end(builder: Builder, child: GObject.Object | null, tagname: string, data?: object | null): void
+    vfunc_custom_tag_start(builder: Builder, child: GObject.Object | null, tagname: string): [ /* returnType */ boolean, /* parser */ BuildableParser, /* data */ object | null ]
+    vfunc_get_id(): string
+    vfunc_get_internal_child(builder: Builder, childname: string): GObject.Object
+    vfunc_parser_finished(builder: Builder): void
+    vfunc_set_buildable_property(builder: Builder, name: string, value: any): void
+    vfunc_set_id(id: string): void
+    /* Virtual methods of GObject.Object */
+    vfunc_constructed(): void
+    vfunc_dispatch_properties_changed(n_pspecs: number, pspecs: GObject.ParamSpec): void
+    vfunc_dispose(): void
+    vfunc_finalize(): void
+    vfunc_get_property(property_id: number, value: GObject.Value, pspec: GObject.ParamSpec): void
+    vfunc_notify(pspec: GObject.ParamSpec): void
+    vfunc_set_property(property_id: number, value: GObject.Value, pspec: GObject.ParamSpec): void
+    /* Signals of Gtk.Dialog */
+    connect(sigName: "close", callback: (($obj: PageSetupUnixDialog) => void)): number
+    connect_after(sigName: "close", callback: (($obj: PageSetupUnixDialog) => void)): number
+    emit(sigName: "close"): void
+    connect(sigName: "response", callback: (($obj: PageSetupUnixDialog, response_id: number) => void)): number
+    connect_after(sigName: "response", callback: (($obj: PageSetupUnixDialog, response_id: number) => void)): number
+    emit(sigName: "response", response_id: number): void
+    /* Signals of Gtk.Window */
+    connect(sigName: "activate-default", callback: (($obj: PageSetupUnixDialog) => void)): number
+    connect_after(sigName: "activate-default", callback: (($obj: PageSetupUnixDialog) => void)): number
+    emit(sigName: "activate-default"): void
+    connect(sigName: "activate-focus", callback: (($obj: PageSetupUnixDialog) => void)): number
+    connect_after(sigName: "activate-focus", callback: (($obj: PageSetupUnixDialog) => void)): number
+    emit(sigName: "activate-focus"): void
+    connect(sigName: "close-request", callback: (($obj: PageSetupUnixDialog) => boolean)): number
+    connect_after(sigName: "close-request", callback: (($obj: PageSetupUnixDialog) => boolean)): number
+    emit(sigName: "close-request"): void
+    connect(sigName: "enable-debugging", callback: (($obj: PageSetupUnixDialog, toggle: boolean) => boolean)): number
+    connect_after(sigName: "enable-debugging", callback: (($obj: PageSetupUnixDialog, toggle: boolean) => boolean)): number
+    emit(sigName: "enable-debugging", toggle: boolean): void
+    connect(sigName: "keys-changed", callback: (($obj: PageSetupUnixDialog) => void)): number
+    connect_after(sigName: "keys-changed", callback: (($obj: PageSetupUnixDialog) => void)): number
+    emit(sigName: "keys-changed"): void
+    /* Signals of Gtk.Widget */
+    connect(sigName: "destroy", callback: (($obj: PageSetupUnixDialog) => void)): number
+    connect_after(sigName: "destroy", callback: (($obj: PageSetupUnixDialog) => void)): number
+    emit(sigName: "destroy"): void
+    connect(sigName: "direction-changed", callback: (($obj: PageSetupUnixDialog, previous_direction: TextDirection) => void)): number
+    connect_after(sigName: "direction-changed", callback: (($obj: PageSetupUnixDialog, previous_direction: TextDirection) => void)): number
+    emit(sigName: "direction-changed", previous_direction: TextDirection): void
+    connect(sigName: "hide", callback: (($obj: PageSetupUnixDialog) => void)): number
+    connect_after(sigName: "hide", callback: (($obj: PageSetupUnixDialog) => void)): number
+    emit(sigName: "hide"): void
+    connect(sigName: "keynav-failed", callback: (($obj: PageSetupUnixDialog, direction: DirectionType) => boolean)): number
+    connect_after(sigName: "keynav-failed", callback: (($obj: PageSetupUnixDialog, direction: DirectionType) => boolean)): number
+    emit(sigName: "keynav-failed", direction: DirectionType): void
+    connect(sigName: "map", callback: (($obj: PageSetupUnixDialog) => void)): number
+    connect_after(sigName: "map", callback: (($obj: PageSetupUnixDialog) => void)): number
+    emit(sigName: "map"): void
+    connect(sigName: "mnemonic-activate", callback: (($obj: PageSetupUnixDialog, group_cycling: boolean) => boolean)): number
+    connect_after(sigName: "mnemonic-activate", callback: (($obj: PageSetupUnixDialog, group_cycling: boolean) => boolean)): number
+    emit(sigName: "mnemonic-activate", group_cycling: boolean): void
+    connect(sigName: "move-focus", callback: (($obj: PageSetupUnixDialog, direction: DirectionType) => void)): number
+    connect_after(sigName: "move-focus", callback: (($obj: PageSetupUnixDialog, direction: DirectionType) => void)): number
+    emit(sigName: "move-focus", direction: DirectionType): void
+    connect(sigName: "query-tooltip", callback: (($obj: PageSetupUnixDialog, x: number, y: number, keyboard_mode: boolean, tooltip: Tooltip) => boolean)): number
+    connect_after(sigName: "query-tooltip", callback: (($obj: PageSetupUnixDialog, x: number, y: number, keyboard_mode: boolean, tooltip: Tooltip) => boolean)): number
+    emit(sigName: "query-tooltip", x: number, y: number, keyboard_mode: boolean, tooltip: Tooltip): void
+    connect(sigName: "realize", callback: (($obj: PageSetupUnixDialog) => void)): number
+    connect_after(sigName: "realize", callback: (($obj: PageSetupUnixDialog) => void)): number
+    emit(sigName: "realize"): void
+    connect(sigName: "show", callback: (($obj: PageSetupUnixDialog) => void)): number
+    connect_after(sigName: "show", callback: (($obj: PageSetupUnixDialog) => void)): number
+    emit(sigName: "show"): void
+    connect(sigName: "state-flags-changed", callback: (($obj: PageSetupUnixDialog, flags: StateFlags) => void)): number
+    connect_after(sigName: "state-flags-changed", callback: (($obj: PageSetupUnixDialog, flags: StateFlags) => void)): number
+    emit(sigName: "state-flags-changed", flags: StateFlags): void
+    connect(sigName: "unmap", callback: (($obj: PageSetupUnixDialog) => void)): number
+    connect_after(sigName: "unmap", callback: (($obj: PageSetupUnixDialog) => void)): number
+    emit(sigName: "unmap"): void
+    connect(sigName: "unrealize", callback: (($obj: PageSetupUnixDialog) => void)): number
+    connect_after(sigName: "unrealize", callback: (($obj: PageSetupUnixDialog) => void)): number
+    emit(sigName: "unrealize"): void
+    /* Signals of GObject.Object */
+    connect(sigName: "notify", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    emit(sigName: "notify", pspec: GObject.ParamSpec): void
+    connect(sigName: "notify::application", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::application", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::child", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::child", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::decorated", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::decorated", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::default-height", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::default-height", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::default-widget", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::default-widget", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::default-width", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::default-width", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::deletable", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::deletable", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::destroy-with-parent", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::destroy-with-parent", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::display", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::display", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::focus-visible", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::focus-visible", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::focus-widget", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::focus-widget", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::fullscreened", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::fullscreened", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::hide-on-close", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::hide-on-close", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::icon-name", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::icon-name", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::is-active", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::is-active", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::maximized", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::maximized", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::mnemonics-visible", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::mnemonics-visible", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::modal", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::modal", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::resizable", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::resizable", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::startup-id", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::startup-id", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::title", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::title", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::transient-for", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::transient-for", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::can-focus", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::can-focus", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::can-target", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::can-target", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::css-classes", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::css-classes", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::cursor", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::cursor", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::focus-on-click", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::focus-on-click", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::focusable", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::focusable", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::halign", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::halign", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::has-default", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::has-default", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::has-focus", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::has-focus", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::has-tooltip", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::has-tooltip", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::height-request", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::height-request", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::hexpand", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::hexpand", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::hexpand-set", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::hexpand-set", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::layout-manager", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::layout-manager", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::margin-bottom", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::margin-bottom", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::margin-end", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::margin-end", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::margin-start", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::margin-start", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::margin-top", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::margin-top", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::name", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::name", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::opacity", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::opacity", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::overflow", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::overflow", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::parent", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::parent", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::receives-default", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::receives-default", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::root", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::root", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::scale-factor", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::scale-factor", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::sensitive", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::sensitive", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::tooltip-markup", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::tooltip-markup", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::tooltip-text", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::tooltip-text", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::valign", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::valign", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::vexpand", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::vexpand", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::vexpand-set", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::vexpand-set", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::visible", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::visible", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::width-request", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::width-request", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::accessible-role", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::accessible-role", callback: (($obj: PageSetupUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: string, callback: any): number
+    connect_after(sigName: string, callback: any): number
+    emit(sigName: string, ...args: any[]): void
+    disconnect(id: number): void
+    static name: string
+    constructor (config?: PageSetupUnixDialog_ConstructProps)
+    _init (config?: PageSetupUnixDialog_ConstructProps): void
+    /* Static methods and pseudo-constructors */
+    static new(title?: string | null, parent?: Window | null): PageSetupUnixDialog
+    static new(): PageSetupUnixDialog
+    static $gtype: GObject.Type
+}
 export interface Paned_ConstructProps extends Widget_ConstructProps {
     end_child?: Widget
     position?: number
@@ -42710,7 +43370,7 @@ export class Paned {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -43209,7 +43869,7 @@ export class PasswordEntry {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -43708,7 +44368,7 @@ export class Picture {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -44160,7 +44820,7 @@ export class Popover {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -44632,7 +45292,7 @@ export class PopoverMenu {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -45076,7 +45736,7 @@ export class PopoverMenuBar {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -45440,6 +46100,100 @@ export class PrintContext {
     _init (config?: PrintContext_ConstructProps): void
     static $gtype: GObject.Type
 }
+export interface PrintJob_ConstructProps extends GObject.Object_ConstructProps {
+    page_setup?: PageSetup
+    printer?: Printer
+    settings?: PrintSettings
+    title?: string
+    track_print_status?: boolean
+}
+export class PrintJob {
+    /* Properties of Gtk.PrintJob */
+    track_print_status: boolean
+    /* Fields of GObject.Object */
+    g_type_instance: GObject.TypeInstance
+    /* Methods of Gtk.PrintJob */
+    get_collate(): boolean
+    get_n_up(): number
+    get_n_up_layout(): NumberUpLayout
+    get_num_copies(): number
+    get_page_ranges(): PageRange[]
+    get_page_set(): PageSet
+    get_pages(): PrintPages
+    get_printer(): Printer
+    get_reverse(): boolean
+    get_rotate(): boolean
+    get_scale(): number
+    get_settings(): PrintSettings
+    get_status(): PrintStatus
+    get_surface(): cairo.Surface
+    get_title(): string
+    get_track_print_status(): boolean
+    send(callback: PrintJobCompleteFunc): void
+    set_collate(collate: boolean): void
+    set_n_up(n_up: number): void
+    set_n_up_layout(layout: NumberUpLayout): void
+    set_num_copies(num_copies: number): void
+    set_page_ranges(ranges: PageRange[]): void
+    set_page_set(page_set: PageSet): void
+    set_pages(pages: PrintPages): void
+    set_reverse(reverse: boolean): void
+    set_rotate(rotate: boolean): void
+    set_scale(scale: number): void
+    set_source_fd(fd: number): boolean
+    set_source_file(filename: string): boolean
+    set_track_print_status(track_status: boolean): void
+    /* Methods of GObject.Object */
+    bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
+    bind_property_full(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags, transform_to: GObject.Closure, transform_from: GObject.Closure): GObject.Binding
+    force_floating(): void
+    freeze_notify(): void
+    get_data(key: string): object | null
+    get_property(property_name: string, value: GObject.Value): void
+    get_qdata(quark: GLib.Quark): object | null
+    getv(names: string[], values: GObject.Value[]): void
+    is_floating(): boolean
+    notify(property_name: string): void
+    notify_by_pspec(pspec: GObject.ParamSpec): void
+    ref(): GObject.Object
+    ref_sink(): GObject.Object
+    run_dispose(): void
+    set_data(key: string, data?: object | null): void
+    set_property(property_name: string, value: GObject.Value): void
+    steal_data(key: string): object | null
+    steal_qdata(quark: GLib.Quark): object | null
+    thaw_notify(): void
+    unref(): void
+    watch_closure(closure: GObject.Closure): void
+    /* Virtual methods of GObject.Object */
+    vfunc_constructed(): void
+    vfunc_dispatch_properties_changed(n_pspecs: number, pspecs: GObject.ParamSpec): void
+    vfunc_dispose(): void
+    vfunc_finalize(): void
+    vfunc_get_property(property_id: number, value: GObject.Value, pspec: GObject.ParamSpec): void
+    vfunc_notify(pspec: GObject.ParamSpec): void
+    vfunc_set_property(property_id: number, value: GObject.Value, pspec: GObject.ParamSpec): void
+    /* Signals of Gtk.PrintJob */
+    connect(sigName: "status-changed", callback: (($obj: PrintJob) => void)): number
+    connect_after(sigName: "status-changed", callback: (($obj: PrintJob) => void)): number
+    emit(sigName: "status-changed"): void
+    /* Signals of GObject.Object */
+    connect(sigName: "notify", callback: (($obj: PrintJob, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify", callback: (($obj: PrintJob, pspec: GObject.ParamSpec) => void)): number
+    emit(sigName: "notify", pspec: GObject.ParamSpec): void
+    connect(sigName: "notify::track-print-status", callback: (($obj: PrintJob, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::track-print-status", callback: (($obj: PrintJob, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: string, callback: any): number
+    connect_after(sigName: string, callback: any): number
+    emit(sigName: string, ...args: any[]): void
+    disconnect(id: number): void
+    static name: string
+    constructor (config?: PrintJob_ConstructProps)
+    _init (config?: PrintJob_ConstructProps): void
+    /* Static methods and pseudo-constructors */
+    static new(title: string, printer: Printer, settings: PrintSettings, page_setup: PageSetup): PrintJob
+    static $gtype: GObject.Type
+}
 export interface PrintOperation_ConstructProps extends GObject.Object_ConstructProps {
     allow_async?: boolean
     current_page?: number
@@ -45779,6 +46533,727 @@ export class PrintSettings {
     static new_from_key_file(key_file: GLib.KeyFile, group_name?: string | null): PrintSettings
     static $gtype: GObject.Type
 }
+export interface PrintUnixDialog_ConstructProps extends Dialog_ConstructProps {
+    current_page?: number
+    embed_page_setup?: boolean
+    has_selection?: boolean
+    manual_capabilities?: PrintCapabilities
+    page_setup?: PageSetup
+    print_settings?: PrintSettings
+    support_selection?: boolean
+    accessible_role?: AccessibleRole
+}
+export class PrintUnixDialog {
+    /* Properties of Gtk.PrintUnixDialog */
+    current_page: number
+    embed_page_setup: boolean
+    has_selection: boolean
+    manual_capabilities: PrintCapabilities
+    page_setup: PageSetup
+    print_settings: PrintSettings
+    readonly selected_printer: Printer
+    support_selection: boolean
+    /* Properties of Gtk.Window */
+    application: Application
+    child: Widget
+    decorated: boolean
+    default_height: number
+    default_widget: Widget
+    default_width: number
+    deletable: boolean
+    destroy_with_parent: boolean
+    display: Gdk.Display
+    focus_visible: boolean
+    focus_widget: Widget
+    fullscreened: boolean
+    handle_menubar_accel: boolean
+    hide_on_close: boolean
+    icon_name: string
+    readonly is_active: boolean
+    maximized: boolean
+    mnemonics_visible: boolean
+    modal: boolean
+    resizable: boolean
+    startup_id: string
+    title: string
+    transient_for: Window
+    /* Properties of Gtk.Widget */
+    can_focus: boolean
+    can_target: boolean
+    css_classes: string[]
+    cursor: Gdk.Cursor
+    focus_on_click: boolean
+    focusable: boolean
+    halign: Align
+    readonly has_default: boolean
+    readonly has_focus: boolean
+    has_tooltip: boolean
+    height_request: number
+    hexpand: boolean
+    hexpand_set: boolean
+    layout_manager: LayoutManager
+    margin_bottom: number
+    margin_end: number
+    margin_start: number
+    margin_top: number
+    name: string
+    opacity: number
+    overflow: Overflow
+    readonly parent: Widget
+    receives_default: boolean
+    readonly root: Root
+    readonly scale_factor: number
+    sensitive: boolean
+    tooltip_markup: string
+    tooltip_text: string
+    valign: Align
+    vexpand: boolean
+    vexpand_set: boolean
+    visible: boolean
+    width_request: number
+    /* Properties of Gtk.Accessible */
+    accessible_role: AccessibleRole
+    /* Fields of Gtk.Dialog */
+    parent_instance: Window
+    /* Fields of GObject.InitiallyUnowned */
+    g_type_instance: GObject.TypeInstance
+    /* Methods of Gtk.PrintUnixDialog */
+    add_custom_tab(child: Widget, tab_label: Widget): void
+    get_current_page(): number
+    get_embed_page_setup(): boolean
+    get_has_selection(): boolean
+    get_manual_capabilities(): PrintCapabilities
+    get_page_setup(): PageSetup
+    get_page_setup_set(): boolean
+    get_selected_printer(): Printer
+    get_settings(): PrintSettings
+    get_support_selection(): boolean
+    set_current_page(current_page: number): void
+    set_embed_page_setup(embed: boolean): void
+    set_has_selection(has_selection: boolean): void
+    set_manual_capabilities(capabilities: PrintCapabilities): void
+    set_page_setup(page_setup: PageSetup): void
+    set_settings(settings?: PrintSettings | null): void
+    set_support_selection(support_selection: boolean): void
+    /* Methods of Gtk.Dialog */
+    add_action_widget(child: Widget, response_id: number): void
+    add_button(button_text: string, response_id: number): Widget
+    get_content_area(): Box
+    get_header_bar(): HeaderBar
+    get_response_for_widget(widget: Widget): number
+    get_widget_for_response(response_id: number): Widget | null
+    response(response_id: number): void
+    set_default_response(response_id: number): void
+    set_response_sensitive(response_id: number, setting: boolean): void
+    /* Methods of Gtk.Window */
+    close(): void
+    destroy(): void
+    fullscreen(): void
+    fullscreen_on_monitor(monitor: Gdk.Monitor): void
+    get_application(): Application | null
+    get_child(): Widget | null
+    get_decorated(): boolean
+    get_default_size(): [ /* width */ number | null, /* height */ number | null ]
+    get_default_widget(): Widget | null
+    get_deletable(): boolean
+    get_destroy_with_parent(): boolean
+    get_focus(): Widget | null
+    get_focus_visible(): boolean
+    get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
+    get_hide_on_close(): boolean
+    get_icon_name(): string | null
+    get_mnemonics_visible(): boolean
+    get_modal(): boolean
+    get_resizable(): boolean
+    get_title(): string | null
+    get_titlebar(): Widget | null
+    get_transient_for(): Window | null
+    has_group(): boolean
+    is_fullscreen(): boolean
+    is_maximized(): boolean
+    maximize(): void
+    minimize(): void
+    present(): void
+    present_with_time(timestamp: number): void
+    set_application(application?: Application | null): void
+    set_child(child?: Widget | null): void
+    set_decorated(setting: boolean): void
+    set_default_size(width: number, height: number): void
+    set_default_widget(default_widget?: Widget | null): void
+    set_deletable(setting: boolean): void
+    set_destroy_with_parent(setting: boolean): void
+    set_display(display: Gdk.Display): void
+    set_focus(focus?: Widget | null): void
+    set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
+    set_hide_on_close(setting: boolean): void
+    set_icon_name(name?: string | null): void
+    set_mnemonics_visible(setting: boolean): void
+    set_modal(modal: boolean): void
+    set_resizable(resizable: boolean): void
+    set_startup_id(startup_id: string): void
+    set_title(title?: string | null): void
+    set_titlebar(titlebar?: Widget | null): void
+    set_transient_for(parent?: Window | null): void
+    unfullscreen(): void
+    unmaximize(): void
+    unminimize(): void
+    /* Methods of Gtk.Widget */
+    action_set_enabled(action_name: string, enabled: boolean): void
+    activate(): boolean
+    activate_action(name: string, args?: GLib.Variant | null): boolean
+    activate_default(): void
+    add_controller(controller: EventController): void
+    add_css_class(css_class: string): void
+    add_mnemonic_label(label: Widget): void
+    add_tick_callback(callback: TickCallback): number
+    allocate(width: number, height: number, baseline: number, transform?: Gsk.Transform | null): void
+    child_focus(direction: DirectionType): boolean
+    compute_bounds(target: Widget): [ /* returnType */ boolean, /* out_bounds */ Graphene.Rect ]
+    compute_expand(orientation: Orientation): boolean
+    compute_point(target: Widget, point: Graphene.Point): [ /* returnType */ boolean, /* out_point */ Graphene.Point ]
+    compute_transform(target: Widget): [ /* returnType */ boolean, /* out_transform */ Graphene.Matrix ]
+    contains(x: number, y: number): boolean
+    create_pango_context(): Pango.Context
+    create_pango_layout(text?: string | null): Pango.Layout
+    drag_check_threshold(start_x: number, start_y: number, current_x: number, current_y: number): boolean
+    error_bell(): void
+    get_allocated_baseline(): number
+    get_allocated_height(): number
+    get_allocated_width(): number
+    get_allocation(): /* allocation */ Allocation
+    get_ancestor(widget_type: GObject.Type): Widget | null
+    get_can_focus(): boolean
+    get_can_target(): boolean
+    get_child_visible(): boolean
+    get_clipboard(): Gdk.Clipboard
+    get_css_classes(): string[]
+    get_css_name(): string
+    get_cursor(): Gdk.Cursor | null
+    get_direction(): TextDirection
+    get_display(): Gdk.Display
+    get_first_child(): Widget | null
+    get_focus_child(): Widget | null
+    get_focus_on_click(): boolean
+    get_focusable(): boolean
+    get_font_map(): Pango.FontMap | null
+    get_font_options(): cairo.FontOptions | null
+    get_frame_clock(): Gdk.FrameClock | null
+    get_halign(): Align
+    get_has_tooltip(): boolean
+    get_height(): number
+    get_hexpand(): boolean
+    get_hexpand_set(): boolean
+    get_last_child(): Widget | null
+    get_layout_manager(): LayoutManager | null
+    get_mapped(): boolean
+    get_margin_bottom(): number
+    get_margin_end(): number
+    get_margin_start(): number
+    get_margin_top(): number
+    get_name(): string
+    get_native(): Native | null
+    get_next_sibling(): Widget | null
+    get_opacity(): number
+    get_overflow(): Overflow
+    get_pango_context(): Pango.Context
+    get_parent(): Widget | null
+    get_preferred_size(): [ /* minimum_size */ Requisition | null, /* natural_size */ Requisition | null ]
+    get_prev_sibling(): Widget | null
+    get_primary_clipboard(): Gdk.Clipboard
+    get_realized(): boolean
+    get_receives_default(): boolean
+    get_request_mode(): SizeRequestMode
+    get_root(): Root | null
+    get_scale_factor(): number
+    get_sensitive(): boolean
+    get_size(orientation: Orientation): number
+    get_size_request(): [ /* width */ number | null, /* height */ number | null ]
+    get_state_flags(): StateFlags
+    get_style_context(): StyleContext
+    get_template_child(widget_type: GObject.Type, name: string): GObject.Object
+    get_tooltip_markup(): string | null
+    get_tooltip_text(): string | null
+    get_valign(): Align
+    get_vexpand(): boolean
+    get_vexpand_set(): boolean
+    get_visible(): boolean
+    get_width(): number
+    grab_focus(): boolean
+    has_css_class(css_class: string): boolean
+    has_visible_focus(): boolean
+    hide(): void
+    in_destruction(): boolean
+    init_template(): void
+    insert_action_group(name: string, group?: Gio.ActionGroup | null): void
+    insert_after(parent: Widget, previous_sibling?: Widget | null): void
+    insert_before(parent: Widget, next_sibling?: Widget | null): void
+    is_ancestor(ancestor: Widget): boolean
+    is_drawable(): boolean
+    is_focus(): boolean
+    is_sensitive(): boolean
+    is_visible(): boolean
+    keynav_failed(direction: DirectionType): boolean
+    list_mnemonic_labels(): Widget[]
+    map(): void
+    measure(orientation: Orientation, for_size: number): [ /* minimum */ number | null, /* natural */ number | null, /* minimum_baseline */ number | null, /* natural_baseline */ number | null ]
+    mnemonic_activate(group_cycling: boolean): boolean
+    observe_children(): Gio.ListModel
+    observe_controllers(): Gio.ListModel
+    pick(x: number, y: number, flags: PickFlags): Widget | null
+    queue_allocate(): void
+    queue_draw(): void
+    queue_resize(): void
+    realize(): void
+    remove_controller(controller: EventController): void
+    remove_css_class(css_class: string): void
+    remove_mnemonic_label(label: Widget): void
+    remove_tick_callback(id: number): void
+    set_can_focus(can_focus: boolean): void
+    set_can_target(can_target: boolean): void
+    set_child_visible(child_visible: boolean): void
+    set_css_classes(classes: string[]): void
+    set_cursor(cursor?: Gdk.Cursor | null): void
+    set_cursor_from_name(name?: string | null): void
+    set_direction(dir: TextDirection): void
+    set_focus_child(child?: Widget | null): void
+    set_focus_on_click(focus_on_click: boolean): void
+    set_focusable(focusable: boolean): void
+    set_font_map(font_map?: Pango.FontMap | null): void
+    set_font_options(options?: cairo.FontOptions | null): void
+    set_halign(align: Align): void
+    set_has_tooltip(has_tooltip: boolean): void
+    set_hexpand(expand: boolean): void
+    set_hexpand_set(set: boolean): void
+    set_layout_manager(layout_manager?: LayoutManager | null): void
+    set_margin_bottom(margin: number): void
+    set_margin_end(margin: number): void
+    set_margin_start(margin: number): void
+    set_margin_top(margin: number): void
+    set_name(name: string): void
+    set_opacity(opacity: number): void
+    set_overflow(overflow: Overflow): void
+    set_parent(parent: Widget): void
+    set_receives_default(receives_default: boolean): void
+    set_sensitive(sensitive: boolean): void
+    set_size_request(width: number, height: number): void
+    set_state_flags(flags: StateFlags, clear: boolean): void
+    set_tooltip_markup(markup?: string | null): void
+    set_tooltip_text(text?: string | null): void
+    set_valign(align: Align): void
+    set_vexpand(expand: boolean): void
+    set_vexpand_set(set: boolean): void
+    set_visible(visible: boolean): void
+    should_layout(): boolean
+    show(): void
+    size_allocate(allocation: Allocation, baseline: number): void
+    snapshot_child(child: Widget, snapshot: Snapshot): void
+    translate_coordinates(dest_widget: Widget, src_x: number, src_y: number): [ /* returnType */ boolean, /* dest_x */ number | null, /* dest_y */ number | null ]
+    trigger_tooltip_query(): void
+    unmap(): void
+    unparent(): void
+    unrealize(): void
+    unset_state_flags(flags: StateFlags): void
+    /* Methods of GObject.Object */
+    bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
+    bind_property_full(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags, transform_to: GObject.Closure, transform_from: GObject.Closure): GObject.Binding
+    force_floating(): void
+    freeze_notify(): void
+    get_data(key: string): object | null
+    get_property(property_name: string, value: GObject.Value): void
+    get_qdata(quark: GLib.Quark): object | null
+    getv(names: string[], values: GObject.Value[]): void
+    is_floating(): boolean
+    notify(property_name: string): void
+    notify_by_pspec(pspec: GObject.ParamSpec): void
+    ref(): GObject.Object
+    ref_sink(): GObject.Object
+    run_dispose(): void
+    set_data(key: string, data?: object | null): void
+    set_property(property_name: string, value: GObject.Value): void
+    steal_data(key: string): object | null
+    steal_qdata(quark: GLib.Quark): object | null
+    thaw_notify(): void
+    unref(): void
+    watch_closure(closure: GObject.Closure): void
+    /* Methods of Gtk.Accessible */
+    get_accessible_role(): AccessibleRole
+    reset_property(property: AccessibleProperty): void
+    reset_relation(relation: AccessibleRelation): void
+    reset_state(state: AccessibleState): void
+    update_property(properties: AccessibleProperty[], values: any): void
+    update_relation(relations: AccessibleRelation[], values: any): void
+    update_state(states: AccessibleState[], values: any): void
+    /* Methods of Gtk.Buildable */
+    get_buildable_id(): string
+    /* Methods of Gtk.Native */
+    get_renderer(): Gsk.Renderer
+    get_surface(): Gdk.Surface
+    get_surface_transform(): [ /* x */ number, /* y */ number ]
+    /* Virtual methods of Gtk.Dialog */
+    vfunc_close(): void
+    vfunc_response(response_id: number): void
+    /* Virtual methods of Gtk.Window */
+    vfunc_activate_default(): void
+    vfunc_activate_focus(): void
+    vfunc_close_request(): boolean
+    vfunc_enable_debugging(toggle: boolean): boolean
+    vfunc_keys_changed(): void
+    vfunc_add_controller(controller: ShortcutController): void
+    vfunc_remove_controller(controller: ShortcutController): void
+    /* Virtual methods of Gtk.Widget */
+    vfunc_compute_expand(hexpand_p: boolean, vexpand_p: boolean): void
+    vfunc_contains(x: number, y: number): boolean
+    vfunc_css_changed(change: CssStyleChange): void
+    vfunc_direction_changed(previous_direction: TextDirection): void
+    vfunc_focus(direction: DirectionType): boolean
+    vfunc_get_request_mode(): SizeRequestMode
+    vfunc_grab_focus(): boolean
+    vfunc_hide(): void
+    vfunc_keynav_failed(direction: DirectionType): boolean
+    vfunc_map(): void
+    vfunc_measure(orientation: Orientation, for_size: number): [ /* minimum */ number | null, /* natural */ number | null, /* minimum_baseline */ number | null, /* natural_baseline */ number | null ]
+    vfunc_mnemonic_activate(group_cycling: boolean): boolean
+    vfunc_move_focus(direction: DirectionType): void
+    vfunc_query_tooltip(x: number, y: number, keyboard_tooltip: boolean, tooltip: Tooltip): boolean
+    vfunc_realize(): void
+    vfunc_root(): void
+    vfunc_set_focus_child(child?: Widget | null): void
+    vfunc_show(): void
+    vfunc_size_allocate(width: number, height: number, baseline: number): void
+    vfunc_snapshot(snapshot: Snapshot): void
+    vfunc_state_flags_changed(previous_state_flags: StateFlags): void
+    vfunc_system_setting_changed(settings: SystemSetting): void
+    vfunc_unmap(): void
+    vfunc_unrealize(): void
+    vfunc_unroot(): void
+    vfunc_add_child(builder: Builder, child: GObject.Object, type?: string | null): void
+    vfunc_custom_finished(builder: Builder, child: GObject.Object | null, tagname: string, data?: object | null): void
+    vfunc_custom_tag_end(builder: Builder, child: GObject.Object | null, tagname: string, data?: object | null): void
+    vfunc_custom_tag_start(builder: Builder, child: GObject.Object | null, tagname: string): [ /* returnType */ boolean, /* parser */ BuildableParser, /* data */ object | null ]
+    vfunc_get_id(): string
+    vfunc_get_internal_child(builder: Builder, childname: string): GObject.Object
+    vfunc_parser_finished(builder: Builder): void
+    vfunc_set_buildable_property(builder: Builder, name: string, value: any): void
+    vfunc_set_id(id: string): void
+    /* Virtual methods of GObject.Object */
+    vfunc_constructed(): void
+    vfunc_dispatch_properties_changed(n_pspecs: number, pspecs: GObject.ParamSpec): void
+    vfunc_dispose(): void
+    vfunc_finalize(): void
+    vfunc_get_property(property_id: number, value: GObject.Value, pspec: GObject.ParamSpec): void
+    vfunc_notify(pspec: GObject.ParamSpec): void
+    vfunc_set_property(property_id: number, value: GObject.Value, pspec: GObject.ParamSpec): void
+    /* Signals of Gtk.Dialog */
+    connect(sigName: "close", callback: (($obj: PrintUnixDialog) => void)): number
+    connect_after(sigName: "close", callback: (($obj: PrintUnixDialog) => void)): number
+    emit(sigName: "close"): void
+    connect(sigName: "response", callback: (($obj: PrintUnixDialog, response_id: number) => void)): number
+    connect_after(sigName: "response", callback: (($obj: PrintUnixDialog, response_id: number) => void)): number
+    emit(sigName: "response", response_id: number): void
+    /* Signals of Gtk.Window */
+    connect(sigName: "activate-default", callback: (($obj: PrintUnixDialog) => void)): number
+    connect_after(sigName: "activate-default", callback: (($obj: PrintUnixDialog) => void)): number
+    emit(sigName: "activate-default"): void
+    connect(sigName: "activate-focus", callback: (($obj: PrintUnixDialog) => void)): number
+    connect_after(sigName: "activate-focus", callback: (($obj: PrintUnixDialog) => void)): number
+    emit(sigName: "activate-focus"): void
+    connect(sigName: "close-request", callback: (($obj: PrintUnixDialog) => boolean)): number
+    connect_after(sigName: "close-request", callback: (($obj: PrintUnixDialog) => boolean)): number
+    emit(sigName: "close-request"): void
+    connect(sigName: "enable-debugging", callback: (($obj: PrintUnixDialog, toggle: boolean) => boolean)): number
+    connect_after(sigName: "enable-debugging", callback: (($obj: PrintUnixDialog, toggle: boolean) => boolean)): number
+    emit(sigName: "enable-debugging", toggle: boolean): void
+    connect(sigName: "keys-changed", callback: (($obj: PrintUnixDialog) => void)): number
+    connect_after(sigName: "keys-changed", callback: (($obj: PrintUnixDialog) => void)): number
+    emit(sigName: "keys-changed"): void
+    /* Signals of Gtk.Widget */
+    connect(sigName: "destroy", callback: (($obj: PrintUnixDialog) => void)): number
+    connect_after(sigName: "destroy", callback: (($obj: PrintUnixDialog) => void)): number
+    emit(sigName: "destroy"): void
+    connect(sigName: "direction-changed", callback: (($obj: PrintUnixDialog, previous_direction: TextDirection) => void)): number
+    connect_after(sigName: "direction-changed", callback: (($obj: PrintUnixDialog, previous_direction: TextDirection) => void)): number
+    emit(sigName: "direction-changed", previous_direction: TextDirection): void
+    connect(sigName: "hide", callback: (($obj: PrintUnixDialog) => void)): number
+    connect_after(sigName: "hide", callback: (($obj: PrintUnixDialog) => void)): number
+    emit(sigName: "hide"): void
+    connect(sigName: "keynav-failed", callback: (($obj: PrintUnixDialog, direction: DirectionType) => boolean)): number
+    connect_after(sigName: "keynav-failed", callback: (($obj: PrintUnixDialog, direction: DirectionType) => boolean)): number
+    emit(sigName: "keynav-failed", direction: DirectionType): void
+    connect(sigName: "map", callback: (($obj: PrintUnixDialog) => void)): number
+    connect_after(sigName: "map", callback: (($obj: PrintUnixDialog) => void)): number
+    emit(sigName: "map"): void
+    connect(sigName: "mnemonic-activate", callback: (($obj: PrintUnixDialog, group_cycling: boolean) => boolean)): number
+    connect_after(sigName: "mnemonic-activate", callback: (($obj: PrintUnixDialog, group_cycling: boolean) => boolean)): number
+    emit(sigName: "mnemonic-activate", group_cycling: boolean): void
+    connect(sigName: "move-focus", callback: (($obj: PrintUnixDialog, direction: DirectionType) => void)): number
+    connect_after(sigName: "move-focus", callback: (($obj: PrintUnixDialog, direction: DirectionType) => void)): number
+    emit(sigName: "move-focus", direction: DirectionType): void
+    connect(sigName: "query-tooltip", callback: (($obj: PrintUnixDialog, x: number, y: number, keyboard_mode: boolean, tooltip: Tooltip) => boolean)): number
+    connect_after(sigName: "query-tooltip", callback: (($obj: PrintUnixDialog, x: number, y: number, keyboard_mode: boolean, tooltip: Tooltip) => boolean)): number
+    emit(sigName: "query-tooltip", x: number, y: number, keyboard_mode: boolean, tooltip: Tooltip): void
+    connect(sigName: "realize", callback: (($obj: PrintUnixDialog) => void)): number
+    connect_after(sigName: "realize", callback: (($obj: PrintUnixDialog) => void)): number
+    emit(sigName: "realize"): void
+    connect(sigName: "show", callback: (($obj: PrintUnixDialog) => void)): number
+    connect_after(sigName: "show", callback: (($obj: PrintUnixDialog) => void)): number
+    emit(sigName: "show"): void
+    connect(sigName: "state-flags-changed", callback: (($obj: PrintUnixDialog, flags: StateFlags) => void)): number
+    connect_after(sigName: "state-flags-changed", callback: (($obj: PrintUnixDialog, flags: StateFlags) => void)): number
+    emit(sigName: "state-flags-changed", flags: StateFlags): void
+    connect(sigName: "unmap", callback: (($obj: PrintUnixDialog) => void)): number
+    connect_after(sigName: "unmap", callback: (($obj: PrintUnixDialog) => void)): number
+    emit(sigName: "unmap"): void
+    connect(sigName: "unrealize", callback: (($obj: PrintUnixDialog) => void)): number
+    connect_after(sigName: "unrealize", callback: (($obj: PrintUnixDialog) => void)): number
+    emit(sigName: "unrealize"): void
+    /* Signals of GObject.Object */
+    connect(sigName: "notify", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    emit(sigName: "notify", pspec: GObject.ParamSpec): void
+    connect(sigName: "notify::current-page", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::current-page", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::embed-page-setup", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::embed-page-setup", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::has-selection", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::has-selection", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::manual-capabilities", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::manual-capabilities", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::page-setup", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::page-setup", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::print-settings", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::print-settings", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::selected-printer", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::selected-printer", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::support-selection", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::support-selection", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::application", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::application", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::child", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::child", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::decorated", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::decorated", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::default-height", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::default-height", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::default-widget", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::default-widget", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::default-width", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::default-width", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::deletable", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::deletable", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::destroy-with-parent", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::destroy-with-parent", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::display", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::display", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::focus-visible", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::focus-visible", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::focus-widget", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::focus-widget", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::fullscreened", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::fullscreened", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::hide-on-close", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::hide-on-close", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::icon-name", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::icon-name", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::is-active", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::is-active", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::maximized", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::maximized", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::mnemonics-visible", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::mnemonics-visible", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::modal", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::modal", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::resizable", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::resizable", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::startup-id", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::startup-id", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::title", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::title", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::transient-for", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::transient-for", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::can-focus", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::can-focus", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::can-target", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::can-target", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::css-classes", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::css-classes", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::cursor", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::cursor", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::focus-on-click", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::focus-on-click", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::focusable", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::focusable", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::halign", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::halign", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::has-default", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::has-default", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::has-focus", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::has-focus", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::has-tooltip", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::has-tooltip", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::height-request", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::height-request", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::hexpand", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::hexpand", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::hexpand-set", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::hexpand-set", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::layout-manager", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::layout-manager", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::margin-bottom", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::margin-bottom", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::margin-end", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::margin-end", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::margin-start", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::margin-start", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::margin-top", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::margin-top", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::name", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::name", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::opacity", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::opacity", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::overflow", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::overflow", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::parent", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::parent", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::receives-default", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::receives-default", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::root", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::root", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::scale-factor", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::scale-factor", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::sensitive", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::sensitive", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::tooltip-markup", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::tooltip-markup", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::tooltip-text", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::tooltip-text", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::valign", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::valign", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::vexpand", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::vexpand", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::vexpand-set", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::vexpand-set", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::visible", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::visible", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::width-request", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::width-request", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::accessible-role", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::accessible-role", callback: (($obj: PrintUnixDialog, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: string, callback: any): number
+    connect_after(sigName: string, callback: any): number
+    emit(sigName: string, ...args: any[]): void
+    disconnect(id: number): void
+    static name: string
+    constructor (config?: PrintUnixDialog_ConstructProps)
+    _init (config?: PrintUnixDialog_ConstructProps): void
+    /* Static methods and pseudo-constructors */
+    static new(title?: string | null, parent?: Window | null): PrintUnixDialog
+    static new(): PrintUnixDialog
+    static $gtype: GObject.Type
+}
+export interface Printer_ConstructProps extends GObject.Object_ConstructProps {
+    accepts_pdf?: boolean
+    accepts_ps?: boolean
+    is_virtual?: boolean
+    name?: string
+}
+export class Printer {
+    /* Properties of Gtk.Printer */
+    readonly accepting_jobs: boolean
+    readonly icon_name: string
+    readonly job_count: number
+    readonly location: string
+    readonly paused: boolean
+    readonly state_message: string
+    /* Fields of GObject.Object */
+    g_type_instance: GObject.TypeInstance
+    /* Methods of Gtk.Printer */
+    accepts_pdf(): boolean
+    accepts_ps(): boolean
+    compare(b: Printer): number
+    get_backend(): PrintBackend
+    get_capabilities(): PrintCapabilities
+    get_default_page_size(): PageSetup
+    get_description(): string
+    get_hard_margins(): [ /* returnType */ boolean, /* top */ number, /* bottom */ number, /* left */ number, /* right */ number ]
+    get_hard_margins_for_paper_size(paper_size: PaperSize): [ /* returnType */ boolean, /* top */ number, /* bottom */ number, /* left */ number, /* right */ number ]
+    get_icon_name(): string
+    get_job_count(): number
+    get_location(): string
+    get_name(): string
+    get_state_message(): string
+    has_details(): boolean
+    is_accepting_jobs(): boolean
+    is_active(): boolean
+    is_default(): boolean
+    is_paused(): boolean
+    is_virtual(): boolean
+    list_papers(): PageSetup[]
+    request_details(): void
+    /* Methods of GObject.Object */
+    bind_property(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags): GObject.Binding
+    bind_property_full(source_property: string, target: GObject.Object, target_property: string, flags: GObject.BindingFlags, transform_to: GObject.Closure, transform_from: GObject.Closure): GObject.Binding
+    force_floating(): void
+    freeze_notify(): void
+    get_data(key: string): object | null
+    get_property(property_name: string, value: GObject.Value): void
+    get_qdata(quark: GLib.Quark): object | null
+    getv(names: string[], values: GObject.Value[]): void
+    is_floating(): boolean
+    notify(property_name: string): void
+    notify_by_pspec(pspec: GObject.ParamSpec): void
+    ref(): GObject.Object
+    ref_sink(): GObject.Object
+    run_dispose(): void
+    set_data(key: string, data?: object | null): void
+    set_property(property_name: string, value: GObject.Value): void
+    steal_data(key: string): object | null
+    steal_qdata(quark: GLib.Quark): object | null
+    thaw_notify(): void
+    unref(): void
+    watch_closure(closure: GObject.Closure): void
+    /* Virtual methods of GObject.Object */
+    vfunc_constructed(): void
+    vfunc_dispatch_properties_changed(n_pspecs: number, pspecs: GObject.ParamSpec): void
+    vfunc_dispose(): void
+    vfunc_finalize(): void
+    vfunc_get_property(property_id: number, value: GObject.Value, pspec: GObject.ParamSpec): void
+    vfunc_notify(pspec: GObject.ParamSpec): void
+    vfunc_set_property(property_id: number, value: GObject.Value, pspec: GObject.ParamSpec): void
+    /* Signals of Gtk.Printer */
+    connect(sigName: "details-acquired", callback: (($obj: Printer, success: boolean) => void)): number
+    connect_after(sigName: "details-acquired", callback: (($obj: Printer, success: boolean) => void)): number
+    emit(sigName: "details-acquired", success: boolean): void
+    /* Signals of GObject.Object */
+    connect(sigName: "notify", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    emit(sigName: "notify", pspec: GObject.ParamSpec): void
+    connect(sigName: "notify::accepting-jobs", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::accepting-jobs", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::icon-name", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::icon-name", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::job-count", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::job-count", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::location", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::location", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::paused", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::paused", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::state-message", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::state-message", callback: (($obj: Printer, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: string, callback: any): number
+    connect_after(sigName: string, callback: any): number
+    emit(sigName: string, ...args: any[]): void
+    disconnect(id: number): void
+    static name: string
+    constructor (config?: Printer_ConstructProps)
+    _init (config?: Printer_ConstructProps): void
+    /* Static methods and pseudo-constructors */
+    static new(name: string, backend: PrintBackend, virtual_: boolean): Printer
+    static $gtype: GObject.Type
+}
 export interface ProgressBar_ConstructProps extends Widget_ConstructProps {
     ellipsize?: Pango.EllipsizeMode
     fraction?: number
@@ -45906,7 +47381,7 @@ export class ProgressBar {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -46380,7 +47855,7 @@ export class Range {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -46904,7 +48379,7 @@ export class Revealer {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -47369,7 +48844,7 @@ export class Scale {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -47834,7 +49309,7 @@ export class ScaleButton {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -48265,7 +49740,7 @@ export class Scrollbar {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -48734,7 +50209,7 @@ export class ScrolledWindow {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -49195,7 +50670,7 @@ export class SearchBar {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -49625,7 +51100,7 @@ export class SearchEntry {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -50184,7 +51659,7 @@ export class Separator {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -51094,7 +52569,7 @@ export class ShortcutLabel {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -51585,7 +53060,7 @@ export class ShortcutsGroup {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -52031,7 +53506,7 @@ export class ShortcutsSection {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -52474,7 +53949,7 @@ export class ShortcutsShortcut {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -52818,6 +54293,7 @@ export class ShortcutsWindow {
     focus_visible: boolean
     focus_widget: Widget
     fullscreened: boolean
+    handle_menubar_accel: boolean
     hide_on_close: boolean
     icon_name: string
     readonly is_active: boolean
@@ -52883,6 +54359,7 @@ export class ShortcutsWindow {
     get_focus(): Widget | null
     get_focus_visible(): boolean
     get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
     get_hide_on_close(): boolean
     get_icon_name(): string | null
     get_mnemonics_visible(): boolean
@@ -52908,6 +54385,7 @@ export class ShortcutsWindow {
     set_display(display: Gdk.Display): void
     set_focus(focus?: Widget | null): void
     set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
     set_hide_on_close(setting: boolean): void
     set_icon_name(name?: string | null): void
     set_mnemonics_visible(setting: boolean): void
@@ -52973,7 +54451,7 @@ export class ShortcutsWindow {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -53259,6 +54737,8 @@ export class ShortcutsWindow {
     connect_after(sigName: "notify::focus-widget", callback: (($obj: ShortcutsWindow, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::fullscreened", callback: (($obj: ShortcutsWindow, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::fullscreened", callback: (($obj: ShortcutsWindow, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: ShortcutsWindow, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: ShortcutsWindow, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::hide-on-close", callback: (($obj: ShortcutsWindow, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::hide-on-close", callback: (($obj: ShortcutsWindow, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::icon-name", callback: (($obj: ShortcutsWindow, pspec: GObject.ParamSpec) => void)): number
@@ -53496,7 +54976,7 @@ export class SingleSelection {
     get_can_unselect(): boolean
     get_model(): Gio.ListModel
     get_selected(): number
-    get_selected_item(): object | null
+    get_selected_item(): GObject.Object | null
     set_autoselect(autoselect: boolean): void
     set_can_unselect(can_unselect: boolean): void
     set_model(model?: Gio.ListModel | null): void
@@ -54154,7 +55634,7 @@ export class SpinButton {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -54678,7 +56158,7 @@ export class Spinner {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -55120,7 +56600,7 @@ export class Stack {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -55641,7 +57121,7 @@ export class StackSidebar {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -56048,7 +57528,7 @@ export class StackSwitcher {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -56455,7 +57935,7 @@ export class Statusbar {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -56781,11 +58261,11 @@ export class StringFilter {
     /* Fields of GObject.Object */
     g_type_instance: GObject.TypeInstance
     /* Methods of Gtk.StringFilter */
-    get_expression(): Expression
+    get_expression(): Expression | null
     get_ignore_case(): boolean
     get_match_mode(): StringFilterMatchMode
     get_search(): string | null
-    set_expression(expression: Expression): void
+    set_expression(expression?: Expression | null): void
     set_ignore_case(ignore_case: boolean): void
     set_match_mode(mode: StringFilterMatchMode): void
     set_search(search?: string | null): void
@@ -57258,7 +58738,7 @@ export class Switch {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -57768,7 +59248,7 @@ export class Text {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -59201,7 +60681,7 @@ export class TextView {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -59753,7 +61233,7 @@ export class ToggleButton {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -60266,7 +61746,7 @@ export class TreeExpander {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -61557,7 +63037,7 @@ export class TreeView {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -62293,7 +63773,7 @@ export class Video {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -62723,7 +64203,7 @@ export class Viewport {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -63165,7 +64645,7 @@ export class VolumeButton {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -63619,7 +65099,7 @@ export class Widget {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -63929,7 +65409,7 @@ export class Widget {
     static get_layout_manager_type(widget_class: Widget | Function | GObject.Type): GObject.Type
     static install_action(widget_class: Widget | Function | GObject.Type, action_name: string, parameter_type: string | null, activate: WidgetActionActivateFunc): void
     static install_property_action(widget_class: Widget | Function | GObject.Type, action_name: string, property_name: string): void
-    static query_action(widget_class: Widget | Function | GObject.Type, index_: number): [ /* returnType */ boolean, /* owner */ any, /* action_name */ string, /* parameter_type */ GLib.VariantType, /* property_name */ string ]
+    static query_action(widget_class: Widget | Function | GObject.Type, index_: number): [ /* returnType */ boolean, /* owner */ any, /* action_name */ string, /* parameter_type */ GLib.VariantType | null, /* property_name */ string | null ]
     static set_accessible_role(widget_class: Widget | Function | GObject.Type, accessible_role: AccessibleRole): void
     static set_activate_signal(widget_class: Widget | Function | GObject.Type, signal_id: number): void
     static set_activate_signal_from_name(widget_class: Widget | Function | GObject.Type, signal_name: string): void
@@ -64036,6 +65516,7 @@ export interface Window_ConstructProps extends Widget_ConstructProps {
     focus_visible?: boolean
     focus_widget?: Widget
     fullscreened?: boolean
+    handle_menubar_accel?: boolean
     hide_on_close?: boolean
     icon_name?: string
     maximized?: boolean
@@ -64061,6 +65542,7 @@ export class Window {
     focus_visible: boolean
     focus_widget: Widget
     fullscreened: boolean
+    handle_menubar_accel: boolean
     hide_on_close: boolean
     icon_name: string
     readonly is_active: boolean
@@ -64126,6 +65608,7 @@ export class Window {
     get_focus(): Widget | null
     get_focus_visible(): boolean
     get_group(): WindowGroup
+    get_handle_menubar_accel(): boolean
     get_hide_on_close(): boolean
     get_icon_name(): string | null
     get_mnemonics_visible(): boolean
@@ -64151,6 +65634,7 @@ export class Window {
     set_display(display: Gdk.Display): void
     set_focus(focus?: Widget | null): void
     set_focus_visible(setting: boolean): void
+    set_handle_menubar_accel(handle_menubar_accel: boolean): void
     set_hide_on_close(setting: boolean): void
     set_icon_name(name?: string | null): void
     set_mnemonics_visible(setting: boolean): void
@@ -64216,7 +65700,7 @@ export class Window {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -64491,6 +65975,8 @@ export class Window {
     connect_after(sigName: "notify::focus-widget", callback: (($obj: Window, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::fullscreened", callback: (($obj: Window, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::fullscreened", callback: (($obj: Window, pspec: GObject.ParamSpec) => void)): number
+    connect(sigName: "notify::handle-menubar-accel", callback: (($obj: Window, pspec: GObject.ParamSpec) => void)): number
+    connect_after(sigName: "notify::handle-menubar-accel", callback: (($obj: Window, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::hide-on-close", callback: (($obj: Window, pspec: GObject.ParamSpec) => void)): number
     connect_after(sigName: "notify::hide-on-close", callback: (($obj: Window, pspec: GObject.ParamSpec) => void)): number
     connect(sigName: "notify::icon-name", callback: (($obj: Window, pspec: GObject.ParamSpec) => void)): number
@@ -64706,7 +66192,7 @@ export class WindowControls {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -65174,7 +66660,7 @@ export class WindowHandle {
     get_margin_end(): number
     get_margin_start(): number
     get_margin_top(): number
-    get_name(): string | null
+    get_name(): string
     get_native(): Native | null
     get_next_sibling(): Widget | null
     get_opacity(): number
@@ -65765,6 +67251,7 @@ export abstract class CheckButtonClass {
     /* Fields of Gtk.CheckButtonClass */
     parent_class: WidgetClass
     toggled: (check_button: CheckButton) => void
+    activate: (check_button: CheckButton) => void
     static name: string
 }
 export abstract class ColorChooserInterface {
@@ -65774,7 +67261,6 @@ export abstract class ColorChooserInterface {
     set_rgba: (chooser: ColorChooser, color: Gdk.RGBA) => void
     add_palette: (chooser: ColorChooser, orientation: Orientation, colors_per_line: number, colors?: Gdk.RGBA[] | null) => void
     color_activated: (chooser: ColorChooser, color: Gdk.RGBA) => void
-    padding: object[]
     static name: string
 }
 export abstract class ColumnViewClass {
@@ -66009,9 +67495,7 @@ export abstract class FlattenListModelClass {
 }
 export abstract class FlowBoxChildClass {
     /* Fields of Gtk.FlowBoxChildClass */
-    parent_class: WidgetClass
     activate: (child: FlowBoxChild) => void
-    padding: object[]
     static name: string
 }
 export abstract class FontChooserIface {
@@ -66024,7 +67508,6 @@ export abstract class FontChooserIface {
     font_activated: (chooser: FontChooser, fontname: string) => void
     set_font_map: (fontchooser: FontChooser, fontmap?: Pango.FontMap | null) => void
     get_font_map: (fontchooser: FontChooser) => Pango.FontMap | null
-    padding: object[]
     static name: string
 }
 export abstract class FrameClass {
@@ -66105,6 +67588,8 @@ export abstract class IMContextClass {
     set_use_preedit: (context: IMContext, use_preedit: boolean) => void
     set_surrounding: (context: IMContext, text: string, len: number, cursor_index: number) => void
     get_surrounding: (context: IMContext) => [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number ]
+    set_surrounding_with_selection: (context: IMContext, text: string, len: number, cursor_index: number, anchor_index: number) => void
+    get_surrounding_with_selection: (context: IMContext) => [ /* returnType */ boolean, /* text */ string, /* cursor_index */ number, /* anchor_index */ number ]
     static name: string
 }
 export abstract class IMContextSimpleClass {
@@ -66333,6 +67818,9 @@ export abstract class PopoverClass {
     activate_default: (popover: Popover) => void
     static name: string
 }
+export class PrintBackend {
+    static name: string
+}
 export abstract class PrintOperationClass {
     /* Fields of Gtk.PrintOperationClass */
     parent_class: GObject.ObjectClass
@@ -66477,12 +67965,6 @@ export abstract class SelectionModelInterface {
     set_selection: (model: SelectionModel, selected: Bitset, mask: Bitset) => boolean
     static name: string
 }
-export class SettingsValue {
-    /* Fields of Gtk.SettingsValue */
-    origin: string
-    value: any
-    static name: string
-}
 export abstract class ShortcutActionClass {
     static name: string
 }
@@ -66570,9 +68052,6 @@ export abstract class StyleContextClass {
     /* Fields of Gtk.StyleContextClass */
     parent_class: GObject.ObjectClass
     changed: (context: StyleContext) => void
-    static name: string
-}
-export class TextBTree {
     static name: string
 }
 export abstract class TextBufferClass {
@@ -66944,7 +68423,7 @@ export abstract class WidgetClass {
     get_layout_manager_type(widget_class: Widget | Function | GObject.Type): GObject.Type
     install_action(widget_class: Widget | Function | GObject.Type, action_name: string, parameter_type: string | null, activate: WidgetActionActivateFunc): void
     install_property_action(widget_class: Widget | Function | GObject.Type, action_name: string, property_name: string): void
-    query_action(widget_class: Widget | Function | GObject.Type, index_: number): [ /* returnType */ boolean, /* owner */ any, /* action_name */ string, /* parameter_type */ GLib.VariantType, /* property_name */ string ]
+    query_action(widget_class: Widget | Function | GObject.Type, index_: number): [ /* returnType */ boolean, /* owner */ any, /* action_name */ string, /* parameter_type */ GLib.VariantType | null, /* property_name */ string | null ]
     set_accessible_role(widget_class: Widget | Function | GObject.Type, accessible_role: AccessibleRole): void
     set_activate_signal(widget_class: Widget | Function | GObject.Type, signal_id: number): void
     set_activate_signal_from_name(widget_class: Widget | Function | GObject.Type, signal_name: string): void
@@ -66994,4 +68473,4 @@ export abstract class WindowHandleClass {
     parent_class: WidgetClass
     static name: string
 }
-type Allocation = Gdk.Rectangle
+export type Allocation = Gdk.Rectangle

@@ -1007,6 +1007,19 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Gtk.PageSetup': [
     'GObject.Object',
 ],
+    'Gtk.PageSetupUnixDialog': [
+    'Gtk.Dialog',
+    'Gtk.Accessible',
+    'Gtk.Buildable',
+    'Gtk.ConstraintTarget',
+    'Gtk.Native',
+    'Gtk.Root',
+    'Gtk.ShortcutManager',
+    'Gtk.Window',
+    'Gtk.Widget',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
     'Gtk.Paned': [
     'Gtk.Widget',
     'Gtk.Accessible',
@@ -1068,11 +1081,30 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Gtk.PrintContext': [
     'GObject.Object',
 ],
+    'Gtk.PrintJob': [
+    'GObject.Object',
+],
     'Gtk.PrintOperation': [
     'GObject.Object',
     'Gtk.PrintOperationPreview',
 ],
     'Gtk.PrintSettings': [
+    'GObject.Object',
+],
+    'Gtk.PrintUnixDialog': [
+    'Gtk.Dialog',
+    'Gtk.Accessible',
+    'Gtk.Buildable',
+    'Gtk.ConstraintTarget',
+    'Gtk.Native',
+    'Gtk.Root',
+    'Gtk.ShortcutManager',
+    'Gtk.Window',
+    'Gtk.Widget',
+    'GObject.InitiallyUnowned',
+    'GObject.Object',
+],
+    'Gtk.Printer': [
     'GObject.Object',
 ],
     'Gtk.ProgressBar': [
@@ -1658,6 +1690,10 @@ const inheritanceTable: { [key: string]: string[] } = {
     'Gsk.BorderNode': [
     'Gsk.RenderNode',
 ],
+    'Gsk.BroadwayRenderer': [
+    'Gsk.Renderer',
+    'GObject.Object',
+],
     'Gsk.CairoNode': [
     'Gsk.RenderNode',
 ],
@@ -1701,6 +1737,10 @@ const inheritanceTable: { [key: string]: string[] } = {
 ],
     'Gsk.LinearGradientNode': [
     'Gsk.RenderNode',
+],
+    'Gsk.NglRenderer': [
+    'Gsk.Renderer',
+    'GObject.Object',
 ],
     'Gsk.OpacityNode': [
     'Gsk.RenderNode',

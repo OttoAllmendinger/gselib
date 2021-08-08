@@ -143,6 +143,9 @@ export class Session {
     static $gtype: GObject.Type
 }
 export interface TextListener_ConstructProps extends Listener_ConstructProps {
+    delay?: number
+    use_alternate_buffer?: boolean
+    use_color?: boolean
 }
 export class TextListener {
     /* Fields of PolkitAgent.Listener */

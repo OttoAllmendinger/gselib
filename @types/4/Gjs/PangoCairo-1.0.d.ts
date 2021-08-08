@@ -13,7 +13,7 @@ export function context_get_font_options(context: Pango.Context): cairo.FontOpti
 export function context_get_resolution(context: Pango.Context): number
 export function context_set_font_options(context: Pango.Context, options?: cairo.FontOptions | null): void
 export function context_set_resolution(context: Pango.Context, dpi: number): void
-export function context_set_shape_renderer(context: Pango.Context, func: ShapeRendererFunc | null): void
+export function context_set_shape_renderer(context: Pango.Context, func?: ShapeRendererFunc | null): void
 export function create_context(cr: cairo.Context): Pango.Context
 export function create_layout(cr: cairo.Context): Pango.Layout
 export function error_underline_path(cr: cairo.Context, x: number, y: number, width: number, height: number): void

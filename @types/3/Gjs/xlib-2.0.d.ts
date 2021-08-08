@@ -36,16 +36,16 @@ export class XWindowAttributes {
 export class XEvent {
     static name: string
 }
-type Atom = number
-type Colormap = number
-type Cursor = number
-type Drawable = number
-type GC = object
-type KeyCode = number
-type KeySym = number
-type Picture = number
-type Time = number
-type VisualID = number
-type Window = number
-type XID = number
-type Pixmap = number
+export type Atom = number
+export type Colormap = number
+export type Cursor = number
+export type Drawable = number
+export type GC = object
+export type KeyCode = number
+export type KeySym = number
+export type Picture = number
+export type Time = number
+export type VisualID = number
+export type Window = number
+export type XID = number
+export type Pixmap = number
