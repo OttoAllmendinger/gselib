@@ -17,7 +17,7 @@ VAGRANT_DIR ?= gselib/vagrant
 
 all: archive
 
-build: node_modules @types/ dist/ archive
+build: node_modules dist/ archive
 
 node_modules:
 	yarn install
