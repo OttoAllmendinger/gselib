@@ -12,6 +12,8 @@ interface ExtensionUtils {
   };
 
   gettext(msgid: string): string;
+
+  openPrefs(): void;
 }
 
 declare const imports: any;
