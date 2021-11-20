@@ -10,8 +10,12 @@ interface ExtensionUtils {
     metadata: any;
     dir: File;
   };
+
+  gettext(msgid: string): string;
 }
 
 declare const imports: any;
 
 export default imports.misc.extensionUtils as ExtensionUtils;
+
+export const _ = imports.misc.extensionUtils.gettext;
