@@ -15,7 +15,12 @@ EXTENSION_PATH = $(HOME)/$(EXTENSION_PATH_RELATIVE)
 
 VAGRANT_DIR ?= gselib/vagrant
 
+
 all: archive
+
+.PHONY: clean
+clean:
+	rm -rf dist/ $(ZIPFILE)
 
 build: node_modules dist/ archive
 
