@@ -1,16 +1,17 @@
 import { Settings, File } from '@imports/Gio-2.0';
 
+export type ExtensionInfo = {
+  path: string;
+  dir: File;
+  metadata: Record<string, unknown>;
+};
 
 interface ExtensionUtils {
   initTranslations(domain?: string): void;
 
   getSettings(): Settings;
 
-  getCurrentExtension(): {
-    path: string;
-    metadata: Record<string, unknown>;
-    dir: File;
-  };
+  getCurrentExtension(): ExtensionInfo;
 
   openPrefs(): void;
 
