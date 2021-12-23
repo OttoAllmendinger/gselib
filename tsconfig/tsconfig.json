@@ -12,6 +12,7 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
     "paths": {
       "@imports/*": ["../@types/3/Gjs/*", "../@types/4/Gjs/*"]
     }
