@@ -134,6 +134,9 @@ prefs: install
 restart:
 	gjs gselib/tools/restartShell.js
 
+gs_nested:
+	dbus-run-session -- gnome-shell --nested --wayland
+
 
 VM_SSHCONFIG_PATH=/tmp/vagrant-ssh-config.$(GSELIB_VM)
 VM_SSH=ssh -F$(VM_SSHCONFIG_PATH) default
