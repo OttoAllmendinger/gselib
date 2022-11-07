@@ -1,0 +1,23 @@
+{
+  "name": "gselib",
+  "version": "0.1.0",
+  "description": "",
+  "dependencies": {},
+  "devDependencies": {
+    "@gi.ts/cli": "^1.5.10",
+    "@gi.ts/lib": "^1.5.13"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OttoAllmendinger/gselib.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OttoAllmendinger/gselib/issues"
+  },
+  "homepage": "https://github.com/OttoAllmendinger/gselib#readme"
+}

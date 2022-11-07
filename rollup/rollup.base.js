@@ -6,21 +6,21 @@ import json from '@rollup/plugin-json';
 export const buildPath = 'dist';
 
 const globals = {
-  '@imports/Gio-2.0': 'imports.gi.Gio',
-  '@imports/Gdk-3.0': 'imports.gi.Gdk',
-  '@imports/Gdk-4.0': 'imports.gi.Gdk',
-  '@imports/Gtk-3.0': 'imports.gi.Gtk',
-  '@imports/Gtk-4.0': 'imports.gi.Gtk',
-  '@imports/GdkPixbuf-2.0': 'imports.gi.GdkPixbuf',
-  '@imports/GObject-2.0': 'imports.gi.GObject',
-  '@imports/GLib-2.0': 'imports.gi.GLib',
-  '@imports/St-1.0': 'imports.gi.St',
-  '@imports/Shell-0.1': 'imports.gi.Shell',
-  '@imports/Meta-8': 'imports.gi.Meta',
-  '@imports/Wnck-3.0': 'imports.gi.Wnck',
-  '@imports/Cogl-8': 'imports.gi.Cogl',
-  '@imports/Clutter-8': 'imports.gi.Clutter',
-  '@imports/Soup-2.4': 'imports.gi.Soup',
+  '@gi-types/gio2': 'imports.gi.Gio',
+  '@gi-types/gdk3': 'imports.gi.Gdk',
+  '@gi-types/gdk4': 'imports.gi.Gdk',
+  '@gi-types/gtk3': 'imports.gi.Gtk',
+  '@gi-types/gtk4': 'imports.gi.Gtk',
+  '@gi-types/gdkpixbuf2': 'imports.gi.GdkPixbuf',
+  '@gi-types/gobject2': 'imports.gi.GObject',
+  '@gi-types/glib2': 'imports.gi.GLib',
+  '@gi-types/st1': 'imports.gi.St',
+  '@gi-types/shell0': 'imports.gi.Shell',
+  '@gi-types/meta8': 'imports.gi.Meta',
+  '@gi-types/cogl8': 'imports.gi.Cogl',
+  '@gi-types/clutter10': 'imports.gi.Clutter',
+  '@gi-types/soup2': 'imports.gi.Soup',
+  '@gi-types/soup3': 'imports.gi.Soup',
 };
 
 const external = Object.keys(globals);

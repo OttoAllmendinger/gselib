@@ -38,14 +38,6 @@ $(ZIPFILE): res/metadata.json schemas
 	    schemas/* \
         $(patsubst res/%,%,$(MO_FILES))
 
-.PHONY: @types/
-@types/: ts-for-gjs/node_modules
-	rm -rf @types/
-	./ts-for-gjs/bin/run generate --configName=./.ts-for-girrc.js > /dev/null 2>&1
-
-ts-for-gjs/node_modules:
-	cd ts-for-gjs && npm install > /dev/null
-
 .PHONY: clean_src
 clean_src:
 	git clean -fx src/
