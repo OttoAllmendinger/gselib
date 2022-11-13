@@ -23,7 +23,10 @@ declare global {
         };
         uiGroup: any;
         extensionManager: any;
+        messageTray: any;
       };
+      slider: any;
+      messageTray: any;
       panelMenu: any;
       popupMenu: any;
       modalDialog: any;
