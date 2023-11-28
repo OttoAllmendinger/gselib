@@ -5,45 +5,48 @@ import json from '@rollup/plugin-json';
 
 export const buildPath = 'dist';
 
-const globals = {
-  '@imports/Gio-2.0': 'imports.gi.Gio',
-  '@imports/Gdk-3.0': 'imports.gi.Gdk',
-  '@imports/Gdk-4.0': 'imports.gi.Gdk',
-  '@imports/Gtk-3.0': 'imports.gi.Gtk',
-  '@imports/Gtk-4.0': 'imports.gi.Gtk',
-  '@imports/GdkPixbuf-2.0': 'imports.gi.GdkPixbuf',
-  '@imports/GObject-2.0': 'imports.gi.GObject',
-  '@imports/GLib-2.0': 'imports.gi.GLib',
-  '@imports/St-1.0': 'imports.gi.St',
-  '@imports/Shell-0.1': 'imports.gi.Shell',
-  '@imports/Meta-8': 'imports.gi.Meta',
-  '@imports/Wnck-3.0': 'imports.gi.Wnck',
-  '@imports/Cogl-8': 'imports.gi.Cogl',
-  '@imports/Clutter-8': 'imports.gi.Clutter',
-  '@imports/Soup-2.4': 'imports.gi.Soup',
-};
-
-const external = Object.keys(globals);
-
-const banner = [].join('\n');
-
-export const prefsFooter = `
-var init = prefs.init;
-var buildPrefsWidget = prefs.buildPrefsWidget;
-`;
-
 const ts = typescript({ tsconfig: './tsconfig.json' });
 
-export function target({ input, output, plugins = [] }) {
+const imports = {
+  '@gnome-shell/misc/util': { name: 'resource://EXT_ROOT/misc/util.js' },
+  '@gnome-shell/misc/config': { name: 'resource://EXT_ROOT/misc/config.js' },
+  '@gnome-shell/misc/signals': { name: 'resource://EXT_ROOT/misc/signals.js' },
+  '@gnome-shell/misc/animationUtils': { name: 'resource://EXT_ROOT/misc/animationUtils.js' },
+
+  '@gnome-shell/extensions/extension': { name: 'resource://EXT_ROOT/extensions/extension.js' },
+  '@gnome-shell/extensions/prefs': { name: 'resource:///EXT_ROOT/extensions/prefs.js' },
+
+  '@gnome-shell/ui/layout': { name: 'resource://EXT_ROOT/ui/layout.js' },
+  '@gnome-shell/ui/main': { name: 'resource://EXT_ROOT/ui/main.js' },
+  '@gnome-shell/ui/messageTray': { name: 'resource://EXT_ROOT/ui/messageTray.js' },
+  '@gnome-shell/ui/lightbox': { name: 'resource://EXT_ROOT/ui/lightbox.js' },
+  '@gnome-shell/ui/dialog': { name: 'resource://EXT_ROOT/ui/dialog.js' },
+  '@gnome-shell/ui/modalDialog': { name: 'resource://EXT_ROOT/ui/modalDialog.js' },
+  '@gnome-shell/ui/popupMenu': { name: 'resource://EXT_ROOT/ui/popupMenu.js' },
+  '@gnome-shell/ui/panelMenu': { name: 'resource://EXT_ROOT/ui/panelMenu.js' },
+};
+
+function getPaths(extRoot) {
+  return Object.fromEntries(
+    Object.entries(imports).map(([name, { name: mapping }]) => {
+      try {
+        return [name, mapping.replace(/EXT_ROOT/g, extRoot)];
+      } catch (e) {
+        console.error(`Error while processing ${name} with mapping ${mapping} ${typeof mapping}`);
+        throw e;
+      }
+    }),
+  );
+}
+
+export function targetWithExtRoot(extRoot, { input, output, plugins = [] }) {
   return {
     input,
     output: {
-      format: 'iife',
-      banner,
-      globals,
+      format: 'esm',
+      paths: getPaths(extRoot),
       ...output,
     },
-    external,
     plugins: [
       commonjs(),
       json(),
@@ -54,4 +57,12 @@ export function target({ input, output, plugins = [] }) {
       ...plugins,
     ],
   };
+}
+
+export function targetShell({ input, output, plugins = [] }) {
+  return targetWithExtRoot('/org/gnome/shell', { input, output, plugins });
+}
+
+export function targetShellExt({ input, output, plugins = [] }) {
+  return targetWithExtRoot('/org/gnome/Shell/Extensions/js', { input, output, plugins });
 }

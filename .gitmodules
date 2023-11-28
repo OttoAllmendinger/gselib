@@ -1,6 +1,0 @@
-[submodule "test/ts-for-gjs"]
-	path = test/ts-for-gjs
-	url = https://github.com/sammydre/ts-for-gjs.git
-[submodule "ts-for-gjs"]
-	path = ts-for-gjs
-	url = https://github.com/sammydre/ts-for-gjs.git
