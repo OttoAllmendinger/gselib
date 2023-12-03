@@ -39,7 +39,22 @@ function getPaths(extRoot) {
   );
 }
 
-export function targetWithExtRoot(extRoot, { input, output, plugins = [] }) {
+function pluginStripImportVersion() {
+  return {
+    name: 'strip-import-version',
+    resolveId(source) {
+      if (source.includes('?version=')) {
+        return {
+          id: source.split('?version=')[0],
+          external: true,
+        };
+      }
+      return null;
+    }
+  };
+}
+
+export function targetWithExtRoot(extRoot, { input, output }) {
   return {
     input,
     output: {
@@ -54,15 +69,15 @@ export function targetWithExtRoot(extRoot, { input, output, plugins = [] }) {
         preferBuiltins: false,
       }),
       ts,
-      ...plugins,
+      pluginStripImportVersion(),
     ],
   };
 }
 
-export function targetShell({ input, output, plugins = [] }) {
-  return targetWithExtRoot('/org/gnome/shell', { input, output, plugins });
+export function targetShell({ input, output }) {
+  return targetWithExtRoot('/org/gnome/shell', { input, output });
 }
 
-export function targetShellExt({ input, output, plugins = [] }) {
-  return targetWithExtRoot('/org/gnome/Shell/Extensions/js', { input, output, plugins });
+export function targetShellExt({ input, output }) {
+  return targetWithExtRoot('/org/gnome/Shell/Extensions/js', { input, output });
 }
