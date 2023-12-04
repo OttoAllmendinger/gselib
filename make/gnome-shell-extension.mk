@@ -4,7 +4,8 @@ GIT_VERSION := $(shell git describe --dirty --always)
 
 SOURCE_JAVASCRIPT=$(wildcard dist/*js)
 
-ROLLUP=NODE_OPTIONS=--max_old_space_size=4096 yarn run rollup
+NODE_OPTIONS=--max_old_space_size=4096
+ROLLUP=NODE_OPTIONS=$(NODE_OPTIONS) yarn run rollup
 
 MO_FILES := $(foreach lang,$(LANGUAGES),res/locale/$(lang)/LC_MESSAGES/$(NAME).mo)
 PO_FILES := $(foreach lang,$(LANGUAGES),res/locale/$(lang)/$(lang).po)
@@ -44,7 +45,7 @@ clean_src:
 
 .PHONY: check
 check:
-	yarn run tsc --outDir build/
+	NODE_OPTIONS=$(NODE_OPTIONS) yarn run tsc --outDir build/
 
 .PHONY: dist/
 dist/:
@@ -126,9 +127,13 @@ prefs: install
 restart:
 	gjs gselib/tools/restartShell.js
 
+.PHONY: gs_nested
 gs_nested:
-	MUTTER_DEBUG_DUMMY_MODE_SPECS=1280x768 dbus-run-session -- gnome-shell --nested --wayland
+	MUTTER_DEBUG_DUMMY_MODE_SPECS=1280x768 dbus-run-session --  gnome-shell --nested --wayland
 
+.PHONY: prefs_nested
+prefs_nested:
+	dbus-run-session -- gnome-extensions prefs $(UUID)
 
 VM_SSHCONFIG_PATH=/tmp/vagrant-ssh-config.$(GSELIB_VM)
 VM_SSH=ssh -F$(VM_SSHCONFIG_PATH) default
@@ -156,9 +161,17 @@ vm_install: $(VM_SSHCONFIG_PATH) $(ZIPFILE)
 vm_gs_logs: $(VM_SSHCONFIG_PATH)
 	$(VM_SSH) 'journalctl -f /usr/bin/gnome-shell'
 
+.PHONY: gs_logs
+gs_logs:
+	journalctl -f /usr/bin/gnome-shell
+
 .PHONY: vm_gjs_logs
 vm_gjs_logs: $(VM_SSHCONFIG_PATH)
 	$(VM_SSH) 'journalctl -f /usr/bin/gjs'
+
+.PHONY: gjs_logs
+gjs_logs:
+	journalctl -f /usr/bin/gjs
 
 .PHONY: vm_gs_logout
 vm_gs_logout:

@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "module": "ESNext",
-    "lib": ["ESNext"],
+    "lib": [
+      "ESNext",
+      "dom"
+    ],
     "target": "ESNext",
     "strict": true,
     "noImplicitAny": false,
@@ -25,16 +28,18 @@
       "@gnome-shell/ui/layout": ["./types/ui/layout/index.d.ts"],
       "@gnome-shell/ui/main": ["./types/ui/main/index.d.ts"],
       "@gnome-shell/ui/messageTray": ["./types/ui/messageTray/index.d.ts"],
-      "@gnome-shell/ui/lightbox": ["./types/ui/lightbox/index.d.ts"],
       "@gnome-shell/ui/dialog": ["./types/ui/dialog/index.d.ts"],
       "@gnome-shell/ui/modalDialog": ["./types/ui/modalDialog/index.d.ts"],
       "@gnome-shell/ui/popupMenu": ["./types/ui/popupMenu/index.d.ts"],
       "@gnome-shell/ui/panelMenu": ["./types/ui/panelMenu/index.d.ts"],
+      "@gnome-shell/ui/slider": ["./types/ui/slider/index.d.ts"],
+      "gettext": ["./types/gettext/index.d.ts"],
     }
   },
   "include": [
     "./src/**/*",
     "./@types/**/*",
     "@girs/**/*",
+    "node_modules/@girs/gjs/dom.d.ts"
   ]
 }

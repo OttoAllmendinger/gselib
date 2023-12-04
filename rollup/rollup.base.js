@@ -24,13 +24,20 @@ const imports = {
   '@gnome-shell/ui/modalDialog': { name: 'resource://EXT_ROOT/ui/modalDialog.js' },
   '@gnome-shell/ui/popupMenu': { name: 'resource://EXT_ROOT/ui/popupMenu.js' },
   '@gnome-shell/ui/panelMenu': { name: 'resource://EXT_ROOT/ui/panelMenu.js' },
+  '@gnome-shell/ui/slider': { name: 'resource://EXT_ROOT/ui/slider.js' },
 };
 
 function getPaths(extRoot) {
   return Object.fromEntries(
-    Object.entries(imports).map(([name, { name: mapping }]) => {
+    Object.entries(imports).flatMap(([name, { name: mapping }]) => {
+      if (extRoot === null) {
+        if (mapping.includes('EXT_ROOT')) {
+          return [];
+        }
+      }
+
       try {
-        return [name, mapping.replace(/EXT_ROOT/g, extRoot)];
+        return [[name, mapping.replace(/EXT_ROOT/g, extRoot)]];
       } catch (e) {
         console.error(`Error while processing ${name} with mapping ${mapping} ${typeof mapping}`);
         throw e;
@@ -54,7 +61,7 @@ function pluginStripImportVersion() {
   };
 }
 
-export function targetWithExtRoot(extRoot, { input, output }) {
+export function targetWithExtRoot(extRoot, { input, output, stripVersion = true }) {
   return {
     input,
     output: {
@@ -69,7 +76,7 @@ export function targetWithExtRoot(extRoot, { input, output }) {
         preferBuiltins: false,
       }),
       ts,
-      pluginStripImportVersion(),
+      ...(stripVersion ? [pluginStripImportVersion()] : []),
     ],
   };
 }
@@ -80,4 +87,8 @@ export function targetShell({ input, output }) {
 
 export function targetShellExt({ input, output }) {
   return targetWithExtRoot('/org/gnome/Shell/Extensions/js', { input, output });
+}
+
+export function targetNoShell({ input, output }) {
+  return targetWithExtRoot(null, { input, output, stripVersion: false });
 }
