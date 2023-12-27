@@ -25,6 +25,7 @@ const imports = {
   '@gnome-shell/ui/popupMenu': { name: 'resource://EXT_ROOT/ui/popupMenu.js' },
   '@gnome-shell/ui/panelMenu': { name: 'resource://EXT_ROOT/ui/panelMenu.js' },
   '@gnome-shell/ui/slider': { name: 'resource://EXT_ROOT/ui/slider.js' },
+  '@gnome-shell/ui/screenshot': { name: 'resource://EXT_ROOT/ui/screenshot.js' },
 };
 
 function getPaths(extRoot) {

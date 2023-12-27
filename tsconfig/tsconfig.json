@@ -33,6 +33,7 @@
       "@gnome-shell/ui/popupMenu": ["./types/ui/popupMenu/index.d.ts"],
       "@gnome-shell/ui/panelMenu": ["./types/ui/panelMenu/index.d.ts"],
       "@gnome-shell/ui/slider": ["./types/ui/slider/index.d.ts"],
+      "@gnome-shell/ui/screenshot": ["./types/ui/screenshot/index.d.ts"],
       "gettext": ["./types/gettext/index.d.ts"],
     }
   },
